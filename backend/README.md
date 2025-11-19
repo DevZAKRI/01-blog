@@ -18,6 +18,64 @@ Run locally from the `backend/` folder:
 java -jar target/blog-0.0.1-SNAPSHOT.jar
 ```
 
+## Where the server is started and the boot sequence
+
+Short summary: the process that starts the server is the `Deploy.sh` script at the repository root (or running the Spring Boot process directly inside the `backend/` folder). `Deploy.sh` changes to `backend/`, sources `setup.sh` (which starts the local Postgres container used in development) and then runs the embedded server with the Maven wrapper.
+
+Files and commands involved:
+
+- `./Deploy.sh` (project root)
+   - cd `backend`
+   - `source setup.sh` — runs the setup script that creates/starts the Postgres container and writes `.env` (development bootstrap)
+   - `./mvnw spring-boot:run` — starts Spring Boot in the `backend/` folder
+
+- You can also run the backend directly from the `backend/` folder:
+
+```bash
+# from repo root
+cd backend
+source setup.sh         # starts DB container used for local development
+./mvnw -DskipTests=true spring-boot:run
+
+# or run the packaged jar
+./mvnw -DskipTests package
+java -jar target/blog-0.0.1-SNAPSHOT.jar
+```
+
+Key Java classes that start and announce the server
+
+- `src/main/java/com/zerooneblog/blog/BlogApplication.java` — the Spring Boot `main` class. This is where `SpringApplication.run(...)` is invoked and the Spring context is created.
+- `src/main/java/com/zerooneblog/blog/config/StartupInfo.java` — an `ApplicationListener<ApplicationReadyEvent>` that prints a concise startup block when the application is ready. It uses a marker file in the system temp directory (created under `${java.io.tmpdir}/.startupInfoPrinted-<appName>`) to avoid printing the same block multiple times across DevTools restarts or classloader boundaries.
+
+Why the marker file exists
+
+When running with Spring DevTools enabled, the application can be restarted using a separate classloader; that may fire `ApplicationReadyEvent` more than once and cause duplicate startup messages. The `StartupInfo` listener attempts to create a file in the system temp directory — only the first successful creator prints the startup block. If you'd rather not create a marker file, you can disable DevTools restart by adding `spring.devtools.restart.enabled=false` to your dev profile.
+
+Configuration / where DB credentials come from
+
+- The app reads configuration from `src/main/resources/application.yaml` and environment variables. `Deploy.sh`/`setup.sh` write or export DB credentials for local development — the container started by `setup.sh` is a PostgreSQL container and the produced `.env` or exported variables are used by the Spring Boot process.
+- For tests, the project uses H2 via `src/test/resources/application.properties` so the integration test context can start without an external Postgres instance.
+
+Quick troubleshooting for startup
+
+- If the app fails to start with errors like "password authentication failed for user" — check that the DB container is running and the environment variables in `.env` or `setup.sh` match your Spring Boot properties.
+- If you see the startup block twice in the console, either remove the marker file from the system temp directory or disable DevTools restart as noted above.
+
+Authorization and ownership rules
+
+- Posts: only the post owner or a user with `ROLE_ADMIN` may edit or delete a post. The server enforces this in `PostService` (checks requester id == post.author.id or requester role == "ADMIN").
+- Comments: only the comment owner or `ROLE_ADMIN` may delete a comment. Comment creation is open to authenticated users; deletion is checked in `CommentService.deleteComment`.
+
+Comment likes
+
+- The application now supports liking comments. Endpoints:
+   - POST `/api/v1/posts/{postId}/comments/{commentId}/like` — like a comment (auth required).
+   - DELETE `/api/v1/posts/{postId}/comments/{commentId}/like` — unlike a comment (auth required).
+   - GET `/api/v1/posts/{postId}/comments/{commentId}/likes/count` — returns the number of likes for the comment.
+
+These endpoints are implemented in `CommentController` and backed by `CommentLikeService` and the `comment_likes` table.
+
+
 By default the app uses the configuration in `src/main/resources/application.yaml`. For production you should set environment variables or provide an external `application.yaml`.
 
 ## High level architecture
@@ -235,10 +293,10 @@ Auth & curl examples
 Register and login example using curl (returns a token):
 
 ```bash
-# Register
+# Register // test account
 curl -s -X POST http://localhost:8080/api/v1/auth/register \
    -H 'Content-Type: application/json' \
-   -d '{"username":"alice","password":"s3cret123","email":"alice@example.com"}'
+   -d '{"username":"alice","password":"s3cret123","email":"alice@example.com"}' 
 
 # Login
 curl -s -X POST http://localhost:8080/api/v1/auth/login \
@@ -312,31 +370,11 @@ File uploads
 
 Logging & metrics
 -----------------
-- Spring Boot logs to stdout by default. For production, configure logback or log4j2 appenders to write to files or a log aggregation system.
-- Consider adding metrics (Micrometer + Prometheus) and health checks (`spring-boot-starter-actuator`) for production readiness.
+- Spring Boot logs to stdout by default.
 
-Health check
-------------
-- If you enable Spring Actuator, `/actuator/health` gives a quick liveness check. Add readiness probes in Kubernetes using that endpoint.
-
-Troubleshooting & common issues
--------------------------------
-- 401 on authenticated endpoints: ensure the `Authorization` header contains `Bearer <token>` and the token is valid.
-- 403 on admin endpoints: check that the user has `ROLE_ADMIN` authority (roles often stored as `ROLE_ADMIN` in DB or mapped on login).
-- File upload 413: increase `spring.servlet.multipart.max-file-size` in properties or enforce smaller files client-side.
-- Token not being accepted: check clock skew (JWT expiration) and server time.
 
 How to contribute
 -----------------
 - Follow the existing package structure. Keep DTOs separated from entities.
 - Add tests for new features under `src/test/java`.
 - If you want me to add Swagger/OpenAPI or tests, tell me and I'll implement them (note: Swagger requires a `pom.xml` dependency change).
-
-Next recommended tasks I can implement for you
----------------------------------------------
-1. Add Springdoc OpenAPI dependency and generate a Swagger UI and API YAML (requires `pom.xml` update).
-2. Remove the deprecated DTO files left in `com.zerooneblog.blog.dto.deprecated` and run a final sweep.
-3. Add a small set of integration tests for auth and post creation using the H2 profile.
-
-Which of the above would you like me to do next? (or tell me other edits you want in the documentation)
-

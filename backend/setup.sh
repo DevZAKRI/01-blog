@@ -21,6 +21,7 @@ fi
 
 # 3. Start Docker Compose
 echo "Starting PostgreSQL container..."
+docker compose down -v
 docker compose up -d
 
 # 4. Finished

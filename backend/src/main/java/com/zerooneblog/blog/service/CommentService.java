@@ -38,4 +38,15 @@ public class CommentService {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
         return commentRepository.findByPost(post, pageable);
     }
+
+    public void deleteComment(Long postId, Long commentId, User requester) {
+        Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("Comment not found"));
+        if (!c.getPost().getId().equals(postId)) {
+            throw new NotFoundException("Comment not found");
+        }
+        if (!c.getUser().getId().equals(requester.getId()) && !"ADMIN".equals(requester.getRole())) {
+            throw new NotFoundException("Comment not found");
+        }
+        commentRepository.delete(c);
+    }
 }
