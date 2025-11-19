@@ -1,0 +1,75 @@
+package com.zerooneblog.blog.controller;
+
+import java.util.ArrayList;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.zerooneblog.blog.dto.request.LoginRequest;
+import com.zerooneblog.blog.dto.request.RegisterRequest;
+import com.zerooneblog.blog.dto.response.AuthResponse;
+import com.zerooneblog.blog.model.User;
+import com.zerooneblog.blog.repository.UserRepository;
+import com.zerooneblog.blog.util.JwtUtil;
+
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping("/api/v1/auth")
+public class AuthController {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
+
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                          AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest body) {
+        if (userRepository.existsByUsername(body.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already taken");
+        }
+        if (userRepository.existsByEmail(body.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already in use");
+        }
+
+        User user = new User();
+        user.setUsername(body.getUsername());
+        user.setPassword(passwordEncoder.encode(body.getPassword()));
+        user.setEmail(body.getEmail());
+
+        userRepository.save(user);
+
+        // create token without authenticating for simplicity
+        String token = jwtUtil.generateToken(new UsernamePasswordAuthenticationToken(user.getUsername(), null, new ArrayList<>()));
+        return ResponseEntity.ok(new AuthResponse(token));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest body) {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(body.getUsername(), body.getPassword()));
+        } catch (BadCredentialsException ex) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+        }
+
+        String token = jwtUtil.generateToken(new UsernamePasswordAuthenticationToken(body.getUsername(), null, new ArrayList<>()));
+        return ResponseEntity.ok(new AuthResponse(token));
+    }
+}
