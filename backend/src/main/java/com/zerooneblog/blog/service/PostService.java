@@ -11,21 +11,19 @@ import com.zerooneblog.blog.exception.NotFoundException;
 import com.zerooneblog.blog.model.Post;
 import com.zerooneblog.blog.model.User;
 import com.zerooneblog.blog.repository.PostRepository;
-import com.zerooneblog.blog.repository.UserRepository;
 
 @Service
 public class PostService {
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
     private final NotificationService notificationService;
 
-    public PostService(PostRepository postRepository, UserRepository userRepository, NotificationService notificationService) {
+    public PostService(PostRepository postRepository, NotificationService notificationService) {
         this.postRepository = postRepository;
-        this.userRepository = userRepository;
         this.notificationService = notificationService;
     }
 
     public Post create(Post p) {
+        if (p.getAuthor() != null && p.getAuthor().isBanned()) throw new NotFoundException("User not found");
         Post saved = postRepository.save(p);
         // notify subscribers
         User author = saved.getAuthor();
@@ -37,6 +35,7 @@ public class PostService {
     }
 
     public Post edit(Long id, Post updated, User requester) {
+        if (requester == null || requester.isBanned()) throw new NotFoundException("Post not found");
         Post existing = postRepository.findById(id).orElseThrow(() -> new NotFoundException("Post not found"));
         if (!existing.getAuthor().getId().equals(requester.getId()) && !"ADMIN".equals(requester.getRole())) {
             throw new NotFoundException("Post not found");
@@ -47,6 +46,7 @@ public class PostService {
     }
 
     public void delete(Long id, User requester) {
+        if (requester == null || requester.isBanned()) throw new NotFoundException("Post not found");
         Post existing = postRepository.findById(id).orElseThrow(() -> new NotFoundException("Post not found"));
         if (!existing.getAuthor().getId().equals(requester.getId()) && !"ADMIN".equals(requester.getRole())) {
             throw new NotFoundException("Post not found");
@@ -58,7 +58,15 @@ public class PostService {
         return postRepository.findById(id).orElseThrow(() -> new NotFoundException("Post not found"));
     }
 
+    public Post getByIdVisibleTo(Long id, User requester) {
+        Post p = postRepository.findById(id).orElseThrow(() -> new NotFoundException("Post not found"));
+        if (p.isHidden() && (requester == null || !"ADMIN".equals(requester.getRole()))) {
+            throw new NotFoundException("Post not found");
+        }
+        return p;
+    }
+
     public Page<Post> feedFor(User user, Pageable pageable) {
-        return postRepository.findByAuthorIn(user.getSubscriptions(), pageable);
+        return postRepository.findByAuthorInAndHiddenFalse(user.getSubscriptions(), pageable);
     }
 }

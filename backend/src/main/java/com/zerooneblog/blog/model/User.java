@@ -34,6 +34,7 @@ public class User {
     private String role = "USER";
     private String bio;
     private String avatarUrl;
+    private boolean banned = false;
 
     @Column(updatable = false)
     private Instant createdAt;

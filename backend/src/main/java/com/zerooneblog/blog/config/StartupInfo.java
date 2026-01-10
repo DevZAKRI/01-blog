@@ -28,6 +28,10 @@ public class StartupInfo implements ApplicationListener<ApplicationReadyEvent> {
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
+        if (!(event.getApplicationContext() instanceof WebServerApplicationContext)) {
+            // Non-web or mock web context (e.g., tests) — skip startup info
+            return;
+        }
         WebServerApplicationContext ctx = (WebServerApplicationContext) event.getApplicationContext();
         int port = ctx.getWebServer().getPort();
         String contextPath = env.getProperty("server.servlet.context-path", "");

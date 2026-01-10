@@ -1,0 +1,26 @@
+<mat-list>
+  <mat-list-item *ngFor="let comment of comments">
+    <div class="comment-container">
+      <div class="comment-header">
+        <img [src]="comment.user?.avatar || 'https://via.placeholder.com/32'"
+             alt="Avatar"
+             class="comment-avatar">
+        <div class="comment-info">
+          <a [routerLink]="['/profile', comment.userId]" class="comment-author">
+            {{ comment.user?.username || 'Unknown' }}
+          </a>
+          <span class="comment-time">{{ getTimeSince(comment.createdAt) }}</span>
+        </div>
+        <button mat-icon-button
+                *ngIf="isOwner(comment) || authService.isAdmin()"
+                (click)="onDelete(comment.id)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+      <p class="comment-content">{{ comment.content }}</p>
+    </div>
+  </mat-list-item>
+  <mat-list-item *ngIf="comments.length === 0">
+    <p class="no-comments">No comments yet</p>
+  </mat-list-item>
+</mat-list>

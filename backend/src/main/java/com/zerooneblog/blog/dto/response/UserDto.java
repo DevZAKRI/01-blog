@@ -12,6 +12,7 @@ public class UserDto {
     private String email;
     private String bio;
     private String avatarUrl;
+    private boolean banned;
     private Instant createdAt;
     private String role;
     private Set<Long> subscriberIds;

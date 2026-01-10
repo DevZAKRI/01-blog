@@ -1,0 +1,162 @@
+.admin-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 32px 0;
+}
+
+::ng-deep .mat-mdc-tab-group {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+::ng-deep .mat-mdc-tab-labels {
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+::ng-deep .mat-mdc-tab {
+  min-width: 120px;
+  font-weight: 600;
+}
+
+::ng-deep .mat-mdc-tab.mdc-tab--active {
+  background: white;
+}
+
+.tab-content {
+  padding: 24px;
+  min-height: 500px;
+  position: relative;
+}
+
+table {
+  width: 100%;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+::ng-deep .mat-mdc-table {
+  box-shadow: none;
+}
+
+::ng-deep .mat-mdc-header-row {
+  background: #f8f9fa;
+}
+
+::ng-deep .mat-mdc-header-cell {
+  font-weight: 700;
+  font-size: 14px;
+  color: #1a1a1a;
+  padding: 16px;
+}
+
+::ng-deep .mat-mdc-cell {
+  padding: 16px;
+  font-size: 14px;
+  color: #333;
+}
+
+::ng-deep .mat-mdc-row {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+::ng-deep .mat-mdc-row:hover {
+  background-color: #f8f9fa;
+}
+
+.content-cell {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-reviewed {
+  background-color: #e0f7fa;
+  color: #00838f;
+}
+
+.status-resolved {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+.status-hidden {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
+}
+
+.status-visible {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+mat-spinner {
+  margin: 60px auto;
+}
+
+::ng-deep .mat-mdc-icon-button {
+  width: 40px;
+  height: 40px;
+}
+
+::ng-deep .mat-mdc-icon-button mat-icon {
+  font-size: 20px;
+}
+
+::ng-deep .mat-mdc-button {
+  border-radius: 20px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+@media (max-width: 1200px) {
+  .admin-container {
+    padding: 0 16px;
+  }
+
+  .tab-content {
+    padding: 16px;
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 800px;
+  }
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 24px;
+  }
+
+  ::ng-deep .mat-mdc-tab {
+    min-width: 80px;
+    font-size: 13px;
+  }
+}

@@ -10,4 +10,7 @@ import com.zerooneblog.blog.model.User;
 public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByAuthor(User author, Pageable pageable);
     Page<Post> findByAuthorIn(Iterable<User> authors, Pageable pageable);
+    Page<Post> findAllByHiddenFalse(Pageable pageable);
+    Page<Post> findByAuthorAndHiddenFalse(User author, Pageable pageable);
+    Page<Post> findByAuthorInAndHiddenFalse(Iterable<User> authors, Pageable pageable);
 }

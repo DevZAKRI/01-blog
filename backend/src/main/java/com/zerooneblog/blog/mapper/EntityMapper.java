@@ -22,6 +22,7 @@ public class EntityMapper {
         d.setEmail(u.getEmail());
         d.setBio(u.getBio());
         d.setAvatarUrl(u.getAvatarUrl());
+        d.setBanned(u.isBanned());
         d.setCreatedAt(u.getCreatedAt());
         d.setRole(u.getRole());
         if (u.getSubscribers() != null)
@@ -40,6 +41,7 @@ public class EntityMapper {
         d.setMediaUrl(p.getMediaUrl());
         d.setCreatedAt(p.getCreatedAt());
         d.setUpdatedAt(p.getUpdatedAt());
+        d.setHidden(p.isHidden());
         return d;
     }
 
@@ -73,6 +75,9 @@ public class EntityMapper {
         if (r.getReporter() != null) d.setReporterId(r.getReporter().getId());
         if (r.getTargetUser() != null) d.setTargetUserId(r.getTargetUser().getId());
         d.setReason(r.getReason());
+        d.setStatus(r.getStatus());
+        if (r.getReporter() != null) d.setReporter(toDto(r.getReporter()));
+        if (r.getTargetUser() != null) d.setReportedUser(toDto(r.getTargetUser()));
         d.setCreatedAt(r.getCreatedAt());
         return d;
     }

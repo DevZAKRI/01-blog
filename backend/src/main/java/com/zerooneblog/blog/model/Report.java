@@ -34,6 +34,8 @@ public class Report {
     @Column(columnDefinition = "TEXT")
     private String reason;
 
+    private String status = "PENDING";
+
     private Instant createdAt;
 
     @PrePersist

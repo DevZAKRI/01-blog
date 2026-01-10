@@ -1,0 +1,49 @@
+<div class="post-card">
+  <div class="post-header">
+    <img [src]="post.user?.avatar || 'https://via.placeholder.com/48'" alt="Avatar" class="post-avatar">
+    <div class="post-user-info">
+      <a [routerLink]="['/profile', post.userId]" class="post-username">{{ post.user?.username || 'Unknown' }}</a>
+      <span class="post-time">{{ getTimeSince(post.createdAt) }} ago</span>
+    </div>
+    <button mat-icon-button [matMenuTriggerFor]="menu" class="post-menu-btn" *ngIf="isOwner || authService.isAdmin()">
+      <mat-icon>more_horiz</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="onEdit()" *ngIf="isOwner">
+        <mat-icon>edit</mat-icon>
+        <span>Edit</span>
+      </button>
+      <button mat-menu-item (click)="onDelete()">
+        <mat-icon>delete</mat-icon>
+        <span>Delete</span>
+      </button>
+    </mat-menu>
+  </div>
+
+  <div class="post-media" *ngIf="post.mediaUrl">
+    <img *ngIf="post.mediaType === 'image'" [src]="post.mediaUrl" alt="Post image">
+    <video *ngIf="post.mediaType === 'video'" [src]="post.mediaUrl" controls></video>
+  </div>
+
+  <div class="post-content">
+    <h3 class="post-title" *ngIf="post.content.length > 50">
+      {{ post.content.substring(0, post.content.indexOf('\n') > 0 ? post.content.indexOf('\n') : 100) }}
+    </h3>
+    <p class="post-text">{{ post.content }}</p>
+  </div>
+
+  <div class="post-actions" *ngIf="showActions">
+    <button mat-button class="action-btn like-btn" (click)="onLike()" [class.liked]="post.isLiked">
+      <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+      <span>{{ post.likesCount }}</span>
+    </button>
+    <button mat-button class="action-btn comment-btn" (click)="onComment()">
+      <mat-icon>chat_bubble_outline</mat-icon>
+      <span>{{ post.commentsCount }}</span>
+    </button>
+    <button mat-button class="action-btn share-btn">
+      <mat-icon>share</mat-icon>
+      <span>1</span>
+    </button>
+  </div>
+</div>

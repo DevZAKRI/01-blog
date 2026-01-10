@@ -1,0 +1,64 @@
+.feed-container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.feed-header {
+  margin-bottom: 32px;
+}
+
+.feed-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 12px;
+}
+
+.empty-state mat-icon {
+  font-size: 72px;
+  width: 72px;
+  height: 72px;
+  color: #00bcd4;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 20px 0 8px;
+  color: #1a1a1a;
+}
+
+.empty-subtitle {
+  color: #666;
+  font-size: 15px;
+  margin: 0;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.load-more {
+  display: block;
+  margin: 24px auto 0;
+  border-radius: 24px;
+  padding: 0 32px;
+  height: 44px;
+  font-weight: 600;
+}

@@ -1,0 +1,37 @@
+<h2 mat-dialog-title>Create New Post</h2>
+<mat-dialog-content>
+  <form [formGroup]="postForm">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>What's on your mind?</mat-label>
+      <textarea matInput
+                formControlName="content"
+                rows="4"
+                placeholder="Share your thoughts..."></textarea>
+      <mat-hint>{{ postForm.get('content')?.value?.length || 0 }} / 1000</mat-hint>
+      <mat-error *ngIf="postForm.get('content')?.hasError('required')">
+        Content is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Media URL (Optional)</mat-label>
+      <input matInput
+             formControlName="mediaUrl"
+             (input)="onMediaUrlChange()"
+             placeholder="https://example.com/image.jpg">
+    </mat-form-field>
+
+    <div class="media-preview" *ngIf="mediaPreview">
+      <img [src]="mediaPreview" alt="Preview" *ngIf="postForm.get('mediaType')?.value === 'image'">
+      <video [src]="mediaPreview" controls *ngIf="postForm.get('mediaType')?.value === 'video'"></video>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="isLoading">Cancel</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()"
+          [disabled]="isLoading || postForm.invalid">
+    <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+    <span *ngIf="!isLoading">Post</span>
+  </button>
+</mat-dialog-actions>

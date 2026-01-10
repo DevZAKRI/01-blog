@@ -1,0 +1,13 @@
+.warning-text {
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+button mat-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}

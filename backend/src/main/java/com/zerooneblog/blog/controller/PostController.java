@@ -70,10 +70,13 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public PostDto get(@PathVariable Long id) { return EntityMapper.toDto(postService.getById(id)); }
+    public PostDto get(@PathVariable Long id, Authentication auth) { 
+        User u = (auth == null) ? null : currentUser(auth);
+        return EntityMapper.toDto(postService.getByIdVisibleTo(id, u));
+    }
 
     @GetMapping
     public Page<PostDto> list(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
-        return postRepository.findAll(PageRequest.of(page, size)).map(EntityMapper::toDto);
+        return postRepository.findAllByHiddenFalse(PageRequest.of(page, size)).map(EntityMapper::toDto);
     }
 }

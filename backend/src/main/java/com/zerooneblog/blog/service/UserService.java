@@ -32,7 +32,7 @@ public class UserService {
 
     public Page<Post> listPosts(Long userId, Pageable pageable) {
         User u = findById(userId);
-        return postRepository.findByAuthor(u, pageable);
+        return postRepository.findByAuthorAndHiddenFalse(u, pageable);
     }
 
     public void subscribe(User target, User subscriber) {
@@ -44,7 +44,7 @@ public class UserService {
                 notificationService.createNotification(target, "new_subscriber", "@" + subscriber.getUsername() + " started following you.");
             } catch (Exception e) {
                 // do not block subscribe on notification failure
-                e.printStackTrace();
+                org.slf4j.LoggerFactory.getLogger(UserService.class).warn("Failed to send notification: {}", e.getMessage());
             }
         }
     }

@@ -13,4 +13,5 @@ public class PostDto {
     private String mediaUrl;
     private Instant createdAt;
     private Instant updatedAt;
+    private boolean hidden;
 }

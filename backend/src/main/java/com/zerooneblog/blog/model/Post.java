@@ -37,6 +37,7 @@ public class Post {
     private Instant createdAt;
 
     private Instant updatedAt;
+    private boolean hidden = false;
 
     @PrePersist
     public void prePersist() { this.createdAt = Instant.now(); }

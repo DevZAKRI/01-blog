@@ -1,0 +1,28 @@
+<h2 mat-dialog-title>Report User: {{ data.username }}</h2>
+<mat-dialog-content>
+  <p class="warning-text">Please provide a detailed reason for reporting this user.</p>
+  <form [formGroup]="reportForm">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Reason for Report</mat-label>
+      <textarea matInput
+                formControlName="reason"
+                rows="4"
+                placeholder="Describe the issue..."></textarea>
+      <mat-hint>Minimum 10 characters</mat-hint>
+      <mat-error *ngIf="reportForm.get('reason')?.hasError('required')">
+        Reason is required
+      </mat-error>
+      <mat-error *ngIf="reportForm.get('reason')?.hasError('minlength')">
+        Please provide at least 10 characters
+      </mat-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="isLoading">Cancel</button>
+  <button mat-raised-button color="warn" (click)="onSubmit()"
+          [disabled]="isLoading || reportForm.invalid">
+    <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+    <span *ngIf="!isLoading">Submit Report</span>
+  </button>
+</mat-dialog-actions>
