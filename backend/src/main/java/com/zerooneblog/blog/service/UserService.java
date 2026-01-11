@@ -59,7 +59,16 @@ public class UserService {
         return userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
     }
 
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
+    }
+
     public Page<User> listAll(Pageable pageable) { return userRepository.findAll(pageable); }
+
+    public Page<Post> listPostsByAuthor(Long authorId, Pageable pageable) {
+        User author = userRepository.findById(authorId).orElseThrow(() -> new NotFoundException("Author not found"));
+        return postRepository.findByAuthorAndHiddenFalse(author, pageable);
+    }
 
     public Page<Post> listPostsForSubscription(User owner, Long authorId, Pageable pageable) {
         User author = userRepository.findById(authorId).orElseThrow(() -> new NotFoundException("Author not found"));

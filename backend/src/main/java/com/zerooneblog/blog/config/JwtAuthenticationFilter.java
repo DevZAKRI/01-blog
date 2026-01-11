@@ -27,7 +27,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = extractJwtFromRequest(request);
 
         if (token != null && jwtUtil.isValidToken(token)) {
-            SecurityContextHolder.getContext().setAuthentication(jwtUtil.getAuthentication(token));
+            var auth = jwtUtil.getAuthentication(token);
+            System.out.println("[JWT Filter] Token valid, username from token: '" + auth.getName() + "' (length: " + (auth.getName() != null ? auth.getName().length() : "null") + ")");
+            SecurityContextHolder.getContext().setAuthentication(auth);
         }
 
         filterChain.doFilter(request, response);

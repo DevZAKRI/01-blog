@@ -12,8 +12,18 @@ import com.zerooneblog.blog.model.Notification;
 import com.zerooneblog.blog.model.Post;
 import com.zerooneblog.blog.model.Report;
 import com.zerooneblog.blog.model.User;
+import com.zerooneblog.blog.repository.CommentRepository;
+import com.zerooneblog.blog.repository.LikeRepository;
 
 public class EntityMapper {
+    private static CommentRepository commentRepository;
+    private static LikeRepository likeRepository;
+
+    public EntityMapper(CommentRepository commentRepository, LikeRepository likeRepository) {
+        EntityMapper.commentRepository = commentRepository;
+        EntityMapper.likeRepository = likeRepository;
+    }
+
     public static UserDto toDto(User u) {
         if (u == null) return null;
         UserDto d = new UserDto();
@@ -33,15 +43,42 @@ public class EntityMapper {
     }
 
     public static PostDto toDto(Post p) {
+        return toDto(p, null);
+    }
+
+    public static PostDto toDto(Post p, User currentUser) {
         if (p == null) return null;
         PostDto d = new PostDto();
         d.setId(p.getId());
         if (p.getAuthor() != null) { d.setAuthorId(p.getAuthor().getId()); d.setAuthorUsername(p.getAuthor().getUsername()); }
+        d.setTitle(p.getTitle());
         d.setDescription(p.getDescription());
-        d.setMediaUrl(p.getMediaUrl());
+
+        // Parse JSON mediaUrls array
+        if (p.getMediaUrls() != null && !p.getMediaUrls().isEmpty()) {
+            try {
+                d.setMediaUrls(new com.fasterxml.jackson.databind.ObjectMapper().readValue(p.getMediaUrls(), String[].class));
+            } catch (Exception e) {
+                System.err.println("Error deserializing mediaUrls: " + e.getMessage());
+                d.setMediaUrls(new String[]{});
+            }
+        }
+
         d.setCreatedAt(p.getCreatedAt());
         d.setUpdatedAt(p.getUpdatedAt());
         d.setHidden(p.isHidden());
+
+        // Set like and comment counts if repositories are initialized
+        if (likeRepository != null) {
+            d.setLikesCount(likeRepository.countByPost(p));
+            if (currentUser != null) {
+                d.setLiked(likeRepository.findByUserAndPost(currentUser, p).isPresent());
+            }
+        }
+        if (commentRepository != null) {
+            d.setCommentsCount(commentRepository.countByPost(p));
+        }
+
         return d;
     }
 

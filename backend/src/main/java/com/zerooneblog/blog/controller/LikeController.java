@@ -24,7 +24,7 @@ public class LikeController {
     }
 
     private User currentUser(Authentication auth) {
-        return userRepository.findByUsername(auth.getName()).orElseThrow();
+        return userRepository.findByEmail(auth.getName()).orElseThrow(() -> new RuntimeException("User not found: " + auth.getName()));
     }
 
     @PostMapping("/{id}/like")

@@ -1,0 +1,63 @@
+<div class="explore-container">
+  <h2>Explore Users</h2>
+
+  <div class="users-grid" *ngIf="users.length > 0">
+    <mat-card *ngFor="let user of users" class="user-card" (click)="navigateToProfile(user.id)">
+      <mat-card-header>
+        <img
+          mat-card-avatar
+          [src]="user.avatarUrl | avatar"
+          [alt]="user.username"
+          class="user-avatar"
+        />
+        <mat-card-title>{{ user.username }}</mat-card-title>
+        <mat-card-subtitle *ngIf="user.bio">{{ user.bio }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="user-stats" *ngIf="user.subscribersCount !== undefined || user.subscriptionsCount !== undefined">
+          <span *ngIf="user.subscribersCount !== undefined">
+            <strong>{{ user.subscribersCount }}</strong> subscribers
+          </span>
+          <span *ngIf="user.subscriptionsCount !== undefined">
+            <strong>{{ user.subscriptionsCount }}</strong> subscriptions
+          </span>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button
+          *ngIf="!isOwnProfile(user.id)"
+          mat-raised-button
+          [color]="user.isSubscribed ? 'accent' : 'primary'"
+          (click)="subscribe(user.id, $event)"
+          [disabled]="isSubscribing(user.id)"
+        >
+          <mat-icon *ngIf="!isSubscribing(user.id)">
+            {{ user.isSubscribed ? 'person_remove' : 'person_add' }}
+          </mat-icon>
+          <mat-spinner *ngIf="isSubscribing(user.id)" diameter="20"></mat-spinner>
+          {{ user.isSubscribed ? 'Unsubscribe' : 'Subscribe' }}
+        </button>
+        <button mat-button (click)="navigateToProfile(user.id); $event.stopPropagation()">
+          View Profile
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner></mat-spinner>
+    <p>Loading users...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading && users.length === 0">
+    <mat-icon>people_outline</mat-icon>
+    <h3>No users found</h3>
+    <p>Check back later for new users to explore.</p>
+  </div>
+
+  <div class="load-more" *ngIf="!isLoading && hasMore && users.length > 0">
+    <button mat-raised-button (click)="loadUsers()">Load More</button>
+  </div>
+</div>

@@ -32,12 +32,33 @@ public class CommentController {
         this.commentLikeService = commentLikeService;
     }
 
-    private User currentUser(Authentication auth) { return userRepository.findByUsername(auth.getName()).orElseThrow(); }
+    private User currentUser(Authentication auth) { return userRepository.findByEmail(auth.getName()).orElseThrow(); }
 
     @PostMapping
     public ResponseEntity<CommentDto> add(@PathVariable Long postId, @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.zerooneblog.blog.dto.request.CreateCommentRequest req, Authentication auth) {
-        Comment c = commentService.addComment(postId, currentUser(auth), req.getText());
-        return ResponseEntity.ok(EntityMapper.toDto(c));
+        try {
+            System.out.println("[COMMENT CREATE] Step 1: Starting comment creation for post ID: " + postId);
+            System.out.println("[COMMENT CREATE] Auth name: " + (auth != null ? auth.getName() : "null"));
+            System.out.println("[COMMENT CREATE] Comment text length: " + (req.getText() != null ? req.getText().length() : 0));
+            
+            System.out.println("[COMMENT CREATE] Step 2: Getting current user");
+            User user = currentUser(auth);
+            System.out.println("[COMMENT CREATE] User ID: " + user.getId() + ", username: " + user.getUsername());
+            
+            System.out.println("[COMMENT CREATE] Step 3: Calling commentService.addComment()");
+            Comment c = commentService.addComment(postId, user, req.getText());
+            System.out.println("[COMMENT CREATE] Step 4: Comment saved with ID: " + c.getId());
+            
+            System.out.println("[COMMENT CREATE] Step 5: Converting to DTO");
+            CommentDto dto = EntityMapper.toDto(c);
+            System.out.println("[COMMENT CREATE] Step 6: Comment creation successful");
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            System.err.println("[COMMENT CREATE] ERROR: Exception occurred: " + e.getClass().getName());
+            System.err.println("[COMMENT CREATE] ERROR: Message: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @GetMapping

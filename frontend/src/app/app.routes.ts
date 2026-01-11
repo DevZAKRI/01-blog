@@ -33,6 +33,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/settings/settings.component').then(m => m.SettingsComponent)
       },
       {
+        path: 'explore',
+        loadComponent: () => import('./features/explore/explore.component').then(m => m.ExploreComponent)
+      },
+      {
         path: 'admin',
         canActivate: [adminGuard],
         loadComponent: () => import('./features/admin/admin.component').then(m => m.AdminComponent)

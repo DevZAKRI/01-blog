@@ -29,10 +29,13 @@ public class Post {
     @ManyToOne(fetch = FetchType.LAZY)
     private User author;
 
+    private String title;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private String mediaUrl;
+    @Column(columnDefinition = "TEXT")
+    private String mediaUrls; // JSON string of image URLs array, max 4
 
     private Instant createdAt;
 

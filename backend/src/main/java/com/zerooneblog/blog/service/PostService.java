@@ -23,14 +23,31 @@ public class PostService {
     }
 
     public Post create(Post p) {
-        if (p.getAuthor() != null && p.getAuthor().isBanned()) throw new NotFoundException("User not found");
+        System.out.println("[PostService] Step 1: Checking if author is banned");
+        if (p.getAuthor() != null && p.getAuthor().isBanned()) {
+            System.err.println("[PostService] ERROR: Author is banned");
+            throw new NotFoundException("User not found");
+        }
+        
+        System.out.println("[PostService] Step 2: Saving post to database");
+        System.out.println("[PostService] Post details - Title: " + p.getTitle() + ", Author ID: " + p.getAuthor().getId());
         Post saved = postRepository.save(p);
+        System.out.println("[PostService] Step 3: Post saved with ID: " + saved.getId());
+        
         // notify subscribers
+        System.out.println("[PostService] Step 4: Notifying subscribers");
         User author = saved.getAuthor();
         Set<User> receivers = new HashSet<>(author.getSubscribers());
+        System.out.println("[PostService] Subscriber count: " + receivers.size());
+        
         for (User r : receivers) {
-            notificationService.createNotification(r, "new_post", "New post from " + author.getUsername());
+            try {
+                notificationService.createNotification(r, "new_post", "New post from " + author.getUsername());
+            } catch (Exception e) {
+                System.err.println("[PostService] ERROR: Failed to notify user " + r.getId() + ": " + e.getMessage());
+            }
         }
+        System.out.println("[PostService] Step 5: All notifications sent");
         return saved;
     }
 
@@ -40,8 +57,9 @@ public class PostService {
         if (!existing.getAuthor().getId().equals(requester.getId()) && !"ADMIN".equals(requester.getRole())) {
             throw new NotFoundException("Post not found");
         }
+        existing.setTitle(updated.getTitle());
         existing.setDescription(updated.getDescription());
-        existing.setMediaUrl(updated.getMediaUrl());
+        existing.setMediaUrls(updated.getMediaUrls());
         return postRepository.save(existing);
     }
 

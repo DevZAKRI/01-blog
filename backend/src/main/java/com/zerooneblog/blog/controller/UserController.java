@@ -38,7 +38,7 @@ public class UserController {
 
     @PostMapping("/{id}/subscribe")
     public ResponseEntity<?> subscribe(@PathVariable Long id, Authentication auth) {
-        User subscriber = userService.findByUsername(auth.getName());
+        User subscriber = userService.findByEmail(auth.getName());
         User target = userService.findById(id);
         userService.subscribe(target, subscriber);
         return ResponseEntity.ok().build();
@@ -46,7 +46,7 @@ public class UserController {
 
     @PostMapping("/{id}/unsubscribe")
     public ResponseEntity<?> unsubscribe(@PathVariable Long id, Authentication auth) {
-        User subscriber = userService.findByUsername(auth.getName());
+        User subscriber = userService.findByEmail(auth.getName());
         User target = userService.findById(id);
         userService.unsubscribe(target, subscriber);
         return ResponseEntity.ok().build();
@@ -54,15 +54,28 @@ public class UserController {
 
     @GetMapping
     public Page<UserDto> listUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
-        return userService.listAll(PageRequest.of(page, size)).map(EntityMapper::toDto);
+        System.out.println("[UserController] listUsers called - page: " + page + ", size: " + size);
+        Page<UserDto> result = userService.listAll(PageRequest.of(page, size)).map(EntityMapper::toDto);
+        System.out.println("[UserController] listUsers returning " + result.getTotalElements() + " total users, " + result.getContent().size() + " in current page");
+        return result;
     }
 
     @GetMapping("/{authorId}/posts")
-    public org.springframework.http.ResponseEntity<?> listPostsForSubscribedAuthor(@PathVariable Long authorId, Authentication auth,
+    public org.springframework.http.ResponseEntity<?> listUserPosts(@PathVariable Long authorId, Authentication auth,
                                                @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
-        User owner = userService.findByUsername(auth.getName());
-        // will throw if not subscribed
-        var result = userService.listPostsForSubscription(owner, authorId, PageRequest.of(page, size)).map(com.zerooneblog.blog.mapper.EntityMapper::toDto);
+        // Public endpoint - anyone can view a user's posts
+        var result = userService.listPostsByAuthor(authorId, PageRequest.of(page, size)).map(p -> {
+            // Include like status if user is authenticated
+            if (auth != null && auth.getName() != null) {
+                try {
+                    User currentUser = userService.findByEmail(auth.getName());
+                    return com.zerooneblog.blog.mapper.EntityMapper.toDto(p, currentUser);
+                } catch (Exception e) {
+                    return com.zerooneblog.blog.mapper.EntityMapper.toDto(p);
+                }
+            }
+            return com.zerooneblog.blog.mapper.EntityMapper.toDto(p);
+        });
         if (result.getTotalElements() == 0) {
             return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
                 "message", "No posts found for this author",
@@ -75,7 +88,7 @@ public class UserController {
 
     @PutMapping("/me")
     public ResponseEntity<UserDto> updateMe(@Valid @RequestBody UpdateUserRequest req, Authentication auth) {
-        User user = userService.findByUsername(auth.getName());
+        User user = userService.findByEmail(auth.getName());
         User updated = userService.updateProfile(user, req);
         return ResponseEntity.ok(EntityMapper.toDto(updated));
     }

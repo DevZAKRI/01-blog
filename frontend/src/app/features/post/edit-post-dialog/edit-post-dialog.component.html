@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Create New Post</h2>
+<h2 mat-dialog-title>Edit Post</h2>
 <mat-dialog-content>
   <form [formGroup]="postForm" class="post-form">
     <!-- Title Field -->
@@ -31,7 +31,7 @@
     <div class="media-upload-section">
       <label for="media-input" class="media-label" [class.disabled]="!canAddMore()">
         <mat-icon>add_photo_alternate</mat-icon>
-        <span>Add Images/Videos (Max 4)</span>
+        <span>Add More Media (Max 4)</span>
       </label>
       <input #fileInput
              type="file"
@@ -44,9 +44,9 @@
       <small class="media-hint">{{ getTotalMediaCount() }} / 4 media files</small>
     </div>
 
-    <!-- Uploaded Media Preview -->
+    <!-- Uploaded Media Preview (Existing) -->
     <div class="media-gallery" *ngIf="uploadedMediaUrls.length > 0">
-      <h4>Uploaded Media</h4>
+      <h4>Current Media</h4>
       <div class="preview-grid">
         <div class="preview-item" *ngFor="let url of uploadedMediaUrls; let i = index">
           <img *ngIf="uploadedMediaTypes[i] === 'image'" [src]="url" alt="Uploaded" class="preview-image">
@@ -60,7 +60,7 @@
 
     <!-- Selected Files Preview -->
     <div class="media-gallery" *ngIf="mediaPreviews.length > 0">
-      <h4>Selected Media (Not Yet Uploaded)</h4>
+      <h4>New Media (Not Yet Uploaded)</h4>
       <div class="preview-grid">
         <div class="preview-item" *ngFor="let preview of mediaPreviews; let i = index">
           <img *ngIf="mediaTypes[i] === 'image'" [src]="preview" alt="Preview" class="preview-image">
@@ -70,7 +70,7 @@
           </button>
         </div>
       </div>
-      <small class="upload-hint">Media will be uploaded when you create the post</small>
+      <small class="upload-hint">New media will be uploaded when you save the post</small>
     </div>
 
     <!-- Clear All Button -->
@@ -86,7 +86,8 @@
   <button mat-raised-button color="primary" (click)="onSubmit()"
           [disabled]="isLoading || isUploading || postForm.invalid">
     <mat-spinner diameter="20" *ngIf="isLoading || isUploading"></mat-spinner>
-    <span *ngIf="!isLoading && !isUploading">Create Post</span>
-    <span *ngIf="isUploading">Uploading Images...</span>
+    <span *ngIf="!isLoading && !isUploading">Save Changes</span>
+    <span *ngIf="isUploading">Uploading Media...</span>
+    <span *ngIf="isLoading && !isUploading">Saving...</span>
   </button>
 </mat-dialog-actions>

@@ -56,8 +56,8 @@ public class AuthController {
 
         userRepository.save(user);
 
-        // create token without authenticating for simplicity
-        String token = jwtUtil.generateToken(new UsernamePasswordAuthenticationToken(user.getUsername(), null, new ArrayList<>()));
+        // create token using email (since all controllers lookup by email)
+        String token = jwtUtil.generateToken(new UsernamePasswordAuthenticationToken(user.getEmail(), null, new ArrayList<>()));
         return ResponseEntity.ok(new AuthResponse(token, com.zerooneblog.blog.mapper.EntityMapper.toDto(user)));
     }
 
@@ -69,8 +69,9 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
-        String token = jwtUtil.generateToken(new UsernamePasswordAuthenticationToken(body.getUsername(), null, new ArrayList<>()));
         var user = userRepository.findByUsername(body.getUsername()).orElseThrow();
+        // create token using email (since all controllers lookup by email)
+        String token = jwtUtil.generateToken(new UsernamePasswordAuthenticationToken(user.getEmail(), null, new ArrayList<>()));
         return ResponseEntity.ok(new AuthResponse(token, com.zerooneblog.blog.mapper.EntityMapper.toDto(user)));
     }
 }

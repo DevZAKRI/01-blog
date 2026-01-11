@@ -2,27 +2,28 @@ import { User } from './user.model';
 
 export interface Post {
   id: string;
-  userId: string;
-  content: string;
-  mediaUrl?: string;
-  mediaType?: 'image' | 'video';
+  authorId: string;
+  authorUsername: string;
+  title: string;
+  description: string;
+  mediaUrls?: string[];
   likesCount: number;
   commentsCount: number;
   isLiked: boolean;
   hidden?: boolean;
   createdAt: string;
   updatedAt: string;
-  user?: User;
+  author?: User;
 }
 
 export interface CreatePostRequest {
-  content: string;
-  mediaUrl?: string;
-  mediaType?: 'image' | 'video';
+  title: string;
+  description: string;
+  mediaUrls?: string[];
 }
 
 export interface UpdatePostRequest {
-  content?: string;
-  mediaUrl?: string;
-  mediaType?: 'image' | 'video';
+  title?: string;
+  description?: string;
+  mediaUrls?: string[];
 }

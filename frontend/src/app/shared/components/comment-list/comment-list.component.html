@@ -1,5 +1,5 @@
 <mat-list>
-  <mat-list-item *ngFor="let comment of comments">
+  <mat-list-item *ngFor="let comment of comments" class="comment-item">
     <div class="comment-container">
       <div class="comment-header">
         <img [src]="comment.user | avatar:'32x32'"
@@ -7,17 +7,26 @@
              class="comment-avatar">
         <div class="comment-info">
           <a [routerLink]="['/profile', comment.userId]" class="comment-author">
-            {{ comment.user?.username || 'Unknown' }}
+            {{ comment.user?.username || comment.username || 'Unknown' }}
           </a>
           <span class="comment-time">{{ getTimeSince(comment.createdAt) }}</span>
         </div>
-        <button mat-icon-button
-                *ngIf="isOwner(comment) || authService.isAdmin()"
-                (click)="onDelete(comment.id)">
-          <mat-icon>delete</mat-icon>
-        </button>
+        <div class="comment-actions">
+          <button mat-icon-button
+                  (click)="onLike(comment.id)"
+                  title="Like this comment"
+                  class="like-btn">
+            <mat-icon>favorite_border</mat-icon>
+          </button>
+          <button mat-icon-button
+                  *ngIf="isOwner(comment) || authService.isAdmin()"
+                  (click)="onDelete(comment.id)"
+                  title="Delete comment">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
       </div>
-      <p class="comment-content">{{ comment.content }}</p>
+      <p class="comment-text">{{ comment.text }}</p>
     </div>
   </mat-list-item>
   <mat-list-item *ngIf="comments.length === 0">

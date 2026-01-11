@@ -9,6 +9,7 @@ import { PostCardComponent } from '../../shared/components/post-card/post-card.c
 import { PostService } from '../../core/services/post.service';
 import { Post } from '../../core/models/post.model';
 import { CommentDialogComponent } from '../post/comment-dialog/comment-dialog.component';
+import { EditPostDialogComponent } from '../post/edit-post-dialog/edit-post-dialog.component';
 
 @Component({
   selector: 'app-feed',
@@ -109,6 +110,28 @@ export class FeedComponent implements OnInit {
   }
 
   onEdit(post: Post): void {
-    this.snackBar.open('Edit functionality coming soon!', 'Close', { duration: 3000 });
+    const dialogRef = this.dialog.open(EditPostDialogComponent, {
+      width: '600px',
+      data: { post }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Reload the post to get updated data
+        const index = this.posts.findIndex(p => p.id === post.id);
+        if (index >= 0) {
+          this.postService.getPost(post.id).subscribe({
+            next: (updatedPost) => {
+              this.posts[index] = updatedPost;
+              this.snackBar.open('Post updated successfully', 'Close', { duration: 3000 });
+            },
+            error: () => {
+              this.snackBar.open('Failed to reload post', 'Close', { duration: 3000 });
+            }
+          });
+        }
+      }
+    });
   }
 }
+

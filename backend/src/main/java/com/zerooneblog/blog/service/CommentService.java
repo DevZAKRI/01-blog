@@ -24,13 +24,27 @@ public class CommentService {
     }
 
     public Comment addComment(Long postId, User user, String text) {
+        System.out.println("[CommentService] Step 1: Finding post with ID: " + postId);
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
+        System.out.println("[CommentService] Step 2: Post found, author: " + post.getAuthor().getUsername());
+        
+        System.out.println("[CommentService] Step 3: Creating comment object");
         Comment c = new Comment();
         c.setPost(post);
         c.setUser(user);
         c.setText(text);
+        
+        System.out.println("[CommentService] Step 4: Saving comment to database");
         Comment saved = commentRepository.save(c);
-        notificationService.createNotification(post.getAuthor(), "new_comment", "New comment on your post by " + user.getUsername());
+        System.out.println("[CommentService] Step 5: Comment saved with ID: " + saved.getId());
+        
+        System.out.println("[CommentService] Step 6: Notifying post author");
+        try {
+            notificationService.createNotification(post.getAuthor(), "new_comment", "New comment on your post by " + user.getUsername());
+            System.out.println("[CommentService] Step 7: Notification sent successfully");
+        } catch (Exception e) {
+            System.err.println("[CommentService] ERROR: Failed to send notification: " + e.getMessage());
+        }
         return saved;
     }
 

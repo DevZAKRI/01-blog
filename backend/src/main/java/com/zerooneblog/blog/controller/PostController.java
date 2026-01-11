@@ -38,28 +38,81 @@ public class PostController {
     }
 
     private User currentUser(Authentication auth) {
-        return userRepository.findByUsername(auth.getName()).orElseThrow(() -> new NotFoundException("User not found"));
+        if (auth == null || auth.getName() == null) {
+            throw new NotFoundException("User not authenticated");
+        }
+        return userRepository.findByEmail(auth.getName())
+            .orElseThrow(() -> new NotFoundException("User not found: " + auth.getName()));
     }
 
     @PostMapping
     public ResponseEntity<PostDto> create(@jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.zerooneblog.blog.dto.request.CreatePostRequest req, Authentication auth) {
-        User u = currentUser(auth);
-        Post p = new Post();
-        p.setAuthor(u);
-        p.setDescription(req.getDescription());
-        p.setMediaUrl(req.getMediaUrl());
-        Post saved = postService.create(p);
-        return ResponseEntity.created(URI.create("/api/v1/posts/" + saved.getId())).body(EntityMapper.toDto(saved));
+        try {
+            System.out.println("[POST CREATE] Step 1: Starting post creation");
+            System.out.println("[POST CREATE] Auth name: " + (auth != null ? auth.getName() : "null"));
+            System.out.println("[POST CREATE] Title: " + req.getTitle());
+            System.out.println("[POST CREATE] Description length: " + (req.getDescription() != null ? req.getDescription().length() : "null"));
+            System.out.println("[POST CREATE] Media URLs count: " + (req.getMediaUrls() != null ? req.getMediaUrls().length : 0));
+            
+            System.out.println("[POST CREATE] Step 2: Getting current user");
+            User u = currentUser(auth);
+            System.out.println("[POST CREATE] Current user ID: " + u.getId() + ", username: " + u.getUsername());
+            
+            System.out.println("[POST CREATE] Step 3: Creating post object");
+            Post p = new Post();
+            p.setAuthor(u);
+            p.setTitle(req.getTitle());
+            p.setDescription(req.getDescription());
+            
+            // Convert mediaUrls array to JSON string
+            if (req.getMediaUrls() != null && req.getMediaUrls().length > 0) {
+                System.out.println("[POST CREATE] Step 4: Serializing media URLs");
+                try {
+                    String mediaJson = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(req.getMediaUrls());
+                    p.setMediaUrls(mediaJson);
+                    System.out.println("[POST CREATE] Media URLs serialized: " + mediaJson);
+                } catch (Exception e) {
+                    System.err.println("[POST CREATE] ERROR: Failed to serialize media URLs: " + e.getMessage());
+                    p.setMediaUrls(null);
+                }
+            } else {
+                System.out.println("[POST CREATE] Step 4: No media URLs to serialize");
+            }
+            
+            System.out.println("[POST CREATE] Step 5: Calling postService.create()");
+            Post saved = postService.create(p);
+            System.out.println("[POST CREATE] Step 6: Post saved with ID: " + saved.getId());
+            
+            System.out.println("[POST CREATE] Step 7: Converting to DTO");
+            PostDto dto = EntityMapper.toDto(saved, u);
+            System.out.println("[POST CREATE] Step 8: Post creation successful");
+            return ResponseEntity.created(URI.create("/api/v1/posts/" + saved.getId())).body(dto);
+        } catch (Exception e) {
+            System.err.println("[POST CREATE] ERROR: Exception occurred: " + e.getClass().getName());
+            System.err.println("[POST CREATE] ERROR: Message: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @PutMapping("/{id}")
     public PostDto edit(@PathVariable Long id, @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.zerooneblog.blog.dto.request.UpdatePostRequest req, Authentication auth) {
         User u = currentUser(auth);
         Post p = new Post();
+        p.setTitle(req.getTitle());
         p.setDescription(req.getDescription());
-        p.setMediaUrl(req.getMediaUrl());
+        
+        // Convert mediaUrls array to JSON string
+        if (req.getMediaUrls() != null && req.getMediaUrls().length > 0) {
+            try {
+                p.setMediaUrls(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(req.getMediaUrls()));
+            } catch (Exception e) {
+                p.setMediaUrls(null);
+            }
+        }
+        
         Post updated = postService.edit(id, p, u);
-        return EntityMapper.toDto(updated);
+        return EntityMapper.toDto(updated, u);
     }
 
     @DeleteMapping("/{id}")
@@ -72,11 +125,12 @@ public class PostController {
     @GetMapping("/{id}")
     public PostDto get(@PathVariable Long id, Authentication auth) { 
         User u = (auth == null) ? null : currentUser(auth);
-        return EntityMapper.toDto(postService.getByIdVisibleTo(id, u));
+        return EntityMapper.toDto(postService.getByIdVisibleTo(id, u), u);
     }
 
     @GetMapping
-    public Page<PostDto> list(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
-        return postRepository.findAllByHiddenFalse(PageRequest.of(page, size)).map(EntityMapper::toDto);
+    public Page<PostDto> list(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size, Authentication auth) {
+        User u = (auth == null) ? null : currentUser(auth);
+        return postRepository.findAllByHiddenFalse(PageRequest.of(page, size)).map(p -> EntityMapper.toDto(p, u));
     }
 }

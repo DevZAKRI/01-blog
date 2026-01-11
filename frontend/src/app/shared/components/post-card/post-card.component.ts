@@ -8,6 +8,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule } from '@angular/router';
 import { Post } from '../../../core/models/post.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { PostService } from '../../../core/services/post.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-post-card',
@@ -32,15 +34,48 @@ export class PostCardComponent {
   @Output() edit = new EventEmitter<Post>();
   @Output() delete = new EventEmitter<string>();
 
-  constructor(public authService: AuthService) {}
+  isLikingInProgress = false;
+
+  constructor(
+    public authService: AuthService,
+    private postService: PostService,
+    private snackBar: MatSnackBar
+  ) {}
 
   get isOwner(): boolean {
     const currentUser = this.authService.getCurrentUser();
-    return currentUser?.id === this.post.userId;
+    return currentUser?.id === this.post.authorId;
   }
 
   onLike(): void {
-    this.like.emit(this.post.id);
+    if (this.isLikingInProgress) return;
+
+    this.isLikingInProgress = true;
+    if (this.post.isLiked) {
+      this.postService.unlikePost(this.post.id).subscribe({
+        next: () => {
+          this.post.isLiked = false;
+          this.post.likesCount--;
+          this.isLikingInProgress = false;
+        },
+        error: () => {
+          this.snackBar.open('Failed to unlike post', 'Close', { duration: 2000 });
+          this.isLikingInProgress = false;
+        }
+      });
+    } else {
+      this.postService.likePost(this.post.id).subscribe({
+        next: () => {
+          this.post.isLiked = true;
+          this.post.likesCount++;
+          this.isLikingInProgress = false;
+        },
+        error: () => {
+          this.snackBar.open('Failed to like post', 'Close', { duration: 2000 });
+          this.isLikingInProgress = false;
+        }
+      });
+    }
   }
 
   onComment(): void {
@@ -75,5 +110,10 @@ export class PostCardComponent {
     if (interval > 1) return Math.floor(interval) + 'm';
 
     return Math.floor(seconds) + 's';
+  }
+
+  getMediaType(url: string): 'image' | 'video' {
+    const ext = url.split('.').pop()?.toLowerCase();
+    return (ext === 'mp4' || ext === 'webm' || ext === 'ogg' || ext === 'mov') ? 'video' : 'image';
   }
 }

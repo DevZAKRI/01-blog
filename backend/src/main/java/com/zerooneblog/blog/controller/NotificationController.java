@@ -28,7 +28,7 @@ public class NotificationController {
 
     private User currentUser(Authentication auth) {
         if (auth == null || auth.getName() == null) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED);
-        return userRepository.findByUsername(auth.getName()).orElseThrow();
+        return userRepository.findByEmail(auth.getName()).orElseThrow(() -> new RuntimeException("User not found: " + auth.getName()));
     }
 
     @GetMapping

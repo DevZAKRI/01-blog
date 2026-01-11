@@ -4,12 +4,12 @@ export interface Comment {
   id: string;
   postId: string;
   userId: string;
-  content: string;
+  username: string;
+  text: string;
   createdAt: string;
-  updatedAt: string;
   user?: User;
 }
 
 export interface CreateCommentRequest {
-  content: string;
+  text: string;
 }

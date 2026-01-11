@@ -52,10 +52,26 @@
   color: #666;
 }
 
+.post-title {
+  padding: 0 20px 12px;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: #1a1a1a;
+  line-height: 1.3;
+}
+
+.post-title h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
 .post-media {
   width: 100%;
   max-height: 450px;
   overflow: hidden;
+  background-color: #f5f5f5;
 }
 
 .post-media img,
@@ -66,16 +82,94 @@
   display: block;
 }
 
-.post-content {
-  padding: 20px;
+.post-video {
+  background-color: #000;
 }
 
-.post-title {
-  font-size: 20px;
-  font-weight: 700;
-  margin: 0 0 12px 0;
-  color: #1a1a1a;
-  line-height: 1.3;
+/* Multi-Image Gallery Styles */
+.post-media-gallery {
+  width: 100%;
+  background-color: #f5f5f5;
+  overflow: hidden;
+}
+
+.media-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Single Image */
+.media-container.single {
+  max-height: 450px;
+}
+
+.media-container.single .post-image,
+.media-container.single .post-video {
+  max-height: 450px;
+  object-fit: cover;
+  width: 100%;
+  display: block;
+}
+
+/* Two Images Side by Side */
+.media-container.two-images {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-height: 350px;
+  gap: 2px;
+}
+
+.media-container.two-images .post-image,
+.media-container.two-images .post-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Three or Four Images - 1 Large + 2-3 Small */
+.media-container.multi-images {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  max-height: 400px;
+}
+
+.media-container.multi-images .post-image.large,
+.media-container.multi-images .post-video.large {
+  grid-row: span 2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+}
+
+.image-grid .post-image,
+.image-grid .post-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  background-color: #e0e0e0;
+}
+
+.post-content {
+  padding: 20px;
 }
 
 .post-text {
@@ -85,6 +179,19 @@
   color: #333;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.post-stats {
+  display: flex;
+  gap: 16px;
+  padding: 8px 20px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 13px;
+  color: #666;
+}
+
+.stat {
+  padding: 4px 0;
 }
 
 .post-actions {
@@ -104,6 +211,8 @@
   padding: 8px 16px;
   border-radius: 8px;
   transition: all 0.2s;
+  flex: 1;
+  justify-content: center;
 }
 
 .action-btn mat-icon {

@@ -5,8 +5,12 @@ import lombok.Data;
 
 @Data
 public class UpdatePostRequest {
+    @Size(max = 200)
+    private String title;
+
     @Size(max = 5000)
     private String description;
 
-    private String mediaUrl;
+    // optional media URLs (up to 4 images)
+    private String[] mediaUrls;
 }

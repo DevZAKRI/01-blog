@@ -1,8 +1,8 @@
 <div class="post-card">
   <div class="post-header">
-    <img [src]="post.user | avatar:'48x48'" alt="Avatar" class="post-avatar">
+    <img [src]="post.author | avatar:'48x48'" alt="Avatar" class="post-avatar">
     <div class="post-user-info">
-      <a [routerLink]="['/profile', post.userId]" class="post-username">{{ post.user?.username || 'Unknown' }}</a>
+      <a [routerLink]="['/profile', post.authorId]" class="post-username">{{ post.author?.username || post.authorUsername || 'Unknown' }}</a>
       <span class="post-time">{{ getTimeSince(post.createdAt) }} ago</span>
     </div>
     <button mat-icon-button [matMenuTriggerFor]="menu" class="post-menu-btn" *ngIf="isOwner || authService.isAdmin()">
@@ -20,30 +20,66 @@
     </mat-menu>
   </div>
 
-  <div class="post-media" *ngIf="post.mediaUrl">
-    <img *ngIf="post.mediaType === 'image'" [src]="post.mediaUrl" alt="Post image">
-    <video *ngIf="post.mediaType === 'video'" [src]="post.mediaUrl" controls></video>
+  <!-- Post Title -->
+  <div class="post-title" *ngIf="post.title">
+    <h3>{{ post.title }}</h3>
+  </div>
+
+  <!-- Multiple Media Gallery -->
+  <div class="post-media-gallery" *ngIf="post.mediaUrls && post.mediaUrls.length > 0">
+    <!-- Single Media -->
+    <div class="media-container single" *ngIf="post.mediaUrls.length === 1">
+      <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'" [src]="post.mediaUrls[0]" alt="Post image" class="post-image">
+      <video *ngIf="getMediaType(post.mediaUrls[0]) === 'video'" [src]="post.mediaUrls[0]" controls class="post-video"></video>
+    </div>
+
+    <!-- Two Media Items -->
+    <div class="media-container two-images" *ngIf="post.mediaUrls.length === 2">
+      <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'" [src]="post.mediaUrls[0]" alt="Post image 1" class="post-image">
+      <video *ngIf="getMediaType(post.mediaUrls[0]) === 'video'" [src]="post.mediaUrls[0]" controls class="post-video"></video>
+      <img *ngIf="getMediaType(post.mediaUrls[1]) === 'image'" [src]="post.mediaUrls[1]" alt="Post image 2" class="post-image">
+      <video *ngIf="getMediaType(post.mediaUrls[1]) === 'video'" [src]="post.mediaUrls[1]" controls class="post-video"></video>
+    </div>
+
+    <!-- Three or Four Media Items -->
+    <div class="media-container multi-images" *ngIf="post.mediaUrls.length >= 3">
+      <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'" [src]="post.mediaUrls[0]" alt="Post image 1" class="post-image large">
+      <video *ngIf="getMediaType(post.mediaUrls[0]) === 'video'" [src]="post.mediaUrls[0]" controls class="post-video large"></video>
+      <div class="image-grid">
+        <img *ngIf="getMediaType(post.mediaUrls[1]) === 'image'" [src]="post.mediaUrls[1]" alt="Post image 2" class="post-image">
+        <video *ngIf="getMediaType(post.mediaUrls[1]) === 'video'" [src]="post.mediaUrls[1]" controls class="post-video"></video>
+        <img *ngIf="getMediaType(post.mediaUrls[2]) === 'image'" [src]="post.mediaUrls[2]" alt="Post image 3" class="post-image">
+        <video *ngIf="getMediaType(post.mediaUrls[2]) === 'video'" [src]="post.mediaUrls[2]" controls class="post-video"></video>
+        <ng-container *ngIf="post.mediaUrls.length === 4">
+          <img *ngIf="getMediaType(post.mediaUrls[3]) === 'image'" [src]="post.mediaUrls[3]" alt="Post image 4" class="post-image">
+          <video *ngIf="getMediaType(post.mediaUrls[3]) === 'video'" [src]="post.mediaUrls[3]" controls class="post-video"></video>
+        </ng-container>
+        <div class="image-placeholder" *ngIf="post.mediaUrls.length === 3"></div>
+      </div>
+    </div>
   </div>
 
   <div class="post-content">
-    <h3 class="post-title" *ngIf="post.content.length > 50">
-      {{ post.content.substring(0, post.content.indexOf('\n') > 0 ? post.content.indexOf('\n') : 100) }}
-    </h3>
-    <p class="post-text">{{ post.content }}</p>
+    <p class="post-text">{{ post.description }}</p>
+  </div>
+
+  <div class="post-stats">
+    <span class="stat" *ngIf="post.likesCount > 0">{{ post.likesCount }} {{ post.likesCount === 1 ? 'like' : 'likes' }}</span>
+    <span class="stat" *ngIf="post.commentsCount > 0">{{ post.commentsCount }} {{ post.commentsCount === 1 ? 'comment' : 'comments' }}</span>
   </div>
 
   <div class="post-actions" *ngIf="showActions">
-    <button mat-button class="action-btn like-btn" (click)="onLike()" [class.liked]="post.isLiked">
+    <button mat-button class="action-btn like-btn" (click)="onLike()" [class.liked]="post.isLiked" [disabled]="isLikingInProgress">
       <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
-      <span>{{ post.likesCount }}</span>
+      <span>{{ post.isLiked ? 'Unlike' : 'Like' }}</span>
     </button>
     <button mat-button class="action-btn comment-btn" (click)="onComment()">
       <mat-icon>chat_bubble_outline</mat-icon>
-      <span>{{ post.commentsCount }}</span>
+      <span>Comment</span>
     </button>
     <button mat-button class="action-btn share-btn">
       <mat-icon>share</mat-icon>
-      <span>1</span>
+      <span>Share</span>
     </button>
   </div>
 </div>

@@ -11,7 +11,7 @@ import { Post, CreatePostRequest, UpdatePostRequest } from '../models/post.model
 export class PostService {
   constructor(private http: HttpClient) {}
 
-  getFeedPosts(page: number = 1, limit: number = 10): Observable<{ posts: Post[], total: number }> {
+  getFeedPosts(page: number = 0, limit: number = 20): Observable<{ posts: Post[], total: number }> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('size', limit.toString());
@@ -20,7 +20,7 @@ export class PostService {
     );
   }
 
-  getUserPosts(userId: string, page: number = 1, limit: number = 10): Observable<{ posts: Post[], total: number }> {
+  getUserPosts(userId: string, page: number = 0, limit: number = 20): Observable<{ posts: Post[], total: number }> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('size', limit.toString());

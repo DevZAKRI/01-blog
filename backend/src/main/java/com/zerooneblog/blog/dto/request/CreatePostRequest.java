@@ -7,9 +7,13 @@ import lombok.Data;
 @Data
 public class CreatePostRequest {
     @NotBlank
+    @Size(max = 200)
+    private String title;
+
+    @NotBlank
     @Size(max = 5000)
     private String description;
 
-    // optional media URL returned by upload endpoint
-    private String mediaUrl;
+    // optional media URLs (up to 4 images)
+    private String[] mediaUrls;
 }

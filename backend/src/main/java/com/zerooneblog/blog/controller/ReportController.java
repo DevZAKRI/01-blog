@@ -25,7 +25,7 @@ public class ReportController {
         this.userRepository = userRepository;
     }
 
-    private User currentUser(Authentication auth) { return userRepository.findByUsername(auth.getName()).orElseThrow(); }
+    private User currentUser(Authentication auth) { return userRepository.findByEmail(auth.getName()).orElseThrow(); }
 
     @PostMapping("/{id}/report")
     public ResponseEntity<ReportDto> report(@PathVariable Long id, @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.zerooneblog.blog.dto.request.ReportRequest req, Authentication auth) {
