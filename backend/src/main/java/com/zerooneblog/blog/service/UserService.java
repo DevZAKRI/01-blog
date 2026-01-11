@@ -72,7 +72,7 @@ public class UserService {
         if (req.getEmail() != null && !req.getEmail().isBlank()) user.setEmail(req.getEmail());
         if (req.getPassword() != null && !req.getPassword().isBlank()) user.setPassword(passwordEncoder.encode(req.getPassword()));
         if (req.getBio() != null) user.setBio(req.getBio());
-        if (req.getAvatarUrl() != null) user.setAvatarUrl(req.getAvatarUrl());
+        if (req.getAvatar() != null) user.setAvatarUrl(req.getAvatar());
         return userRepository.save(user);
     }
 }

@@ -13,7 +13,15 @@ export class UserService {
   constructor(private http: HttpClient, private authService: AuthService) {}
 
   getUser(userId: string): Observable<User> {
-    return this.http.get<User>(`${environment.apiUrl}/users/${userId}`);
+    return this.http.get<any>(`${environment.apiUrl}/users/${userId}`).pipe(
+      map((user) => {
+        if (user) {
+          if (!user.avatar && user.avatarUrl) user.avatar = user.avatarUrl;
+          if (user.avatar && user.avatar.startsWith('/uploads')) user.avatar = environment.apiUrl + user.avatar;
+        }
+        return user as User;
+      })
+    );
   }
 
   updateProfile(data: Partial<User>): Observable<User> {

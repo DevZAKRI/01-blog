@@ -21,7 +21,15 @@ fi
 
 # 3. Start Docker Compose
 echo "Starting PostgreSQL container..."
-docker compose down -v
+# By default we don't remove volumes to preserve data between restarts.
+# Pass the `reset` argument or set RESET_DB=true to force a reset (this will remove the postgres_data volume).
+if [ "$1" = "reset" ] || [ "${RESET_DB:-false}" = "true" ]; then
+    echo "Reset requested: removing containers and volumes..."
+    docker compose down -v
+else
+    echo "Skipping 'docker compose down -v' to preserve DB volume. Use './setup.sh reset' to reset the DB."
+fi
+
 docker compose up -d
 
 # 4. Finished

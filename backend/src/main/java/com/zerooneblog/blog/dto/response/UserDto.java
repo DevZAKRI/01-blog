@@ -11,7 +11,7 @@ public class UserDto {
     private String username;
     private String email;
     private String bio;
-    private String avatarUrl;
+    private String avatar;
     private boolean banned;
     private Instant createdAt;
     private String role;

@@ -53,7 +53,7 @@ When running with Spring DevTools enabled, the application can be restarted usin
 
 Configuration / where DB credentials come from
 
-- The app reads configuration from `src/main/resources/application.yaml` and environment variables. `Deploy.sh`/`setup.sh` write or export DB credentials for local development — the container started by `setup.sh` is a PostgreSQL container and the produced `.env` or exported variables are used by the Spring Boot process.
+- The app reads configuration from `src/main/resources/application.yaml` and environment variables. `Deploy.sh`/`setup.sh` write or export DB credentials for local development — the container started by `setup.sh` is a PostgreSQL container and the produced `.env` or exported variables are used by the Spring Boot process. Note: `setup.sh` will no longer remove the Postgres volume by default; to reset the DB (and remove the named volume) run `./setup.sh reset` or set `RESET_DB=true` before running `setup.sh`.
 - For tests, the project uses H2 via `src/test/resources/application.properties` so the integration test context can start without an external Postgres instance.
 
 Quick troubleshooting for startup

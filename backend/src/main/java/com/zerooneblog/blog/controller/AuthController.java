@@ -58,7 +58,7 @@ public class AuthController {
 
         // create token without authenticating for simplicity
         String token = jwtUtil.generateToken(new UsernamePasswordAuthenticationToken(user.getUsername(), null, new ArrayList<>()));
-        return ResponseEntity.ok(new AuthResponse(token));
+        return ResponseEntity.ok(new AuthResponse(token, com.zerooneblog.blog.mapper.EntityMapper.toDto(user)));
     }
 
     @PostMapping("/login")
@@ -70,6 +70,7 @@ public class AuthController {
         }
 
         String token = jwtUtil.generateToken(new UsernamePasswordAuthenticationToken(body.getUsername(), null, new ArrayList<>()));
-        return ResponseEntity.ok(new AuthResponse(token));
+        var user = userRepository.findByUsername(body.getUsername()).orElseThrow();
+        return ResponseEntity.ok(new AuthResponse(token, com.zerooneblog.blog.mapper.EntityMapper.toDto(user)));
     }
 }

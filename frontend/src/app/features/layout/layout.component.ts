@@ -11,6 +11,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { AvatarPipe } from '../../core/pipes/avatar.pipe';
 import { CreatePostDialogComponent } from '../post/create-post-dialog/create-post-dialog.component';
 import { Observable } from 'rxjs';
 
@@ -26,7 +27,8 @@ import { Observable } from 'rxjs';
     MatIconModule,
     MatListModule,
     MatBadgeModule,
-    MatMenuModule
+    MatMenuModule,
+    AvatarPipe
   ],
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.css']
@@ -51,6 +53,8 @@ export class LayoutComponent implements OnInit {
   get currentUser() {
     return this.authService.getCurrentUser();
   }
+
+
 
   get isAdmin(): boolean {
     return this.authService.isAdmin();

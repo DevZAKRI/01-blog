@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { AvatarPipe } from '../../../core/pipes/avatar.pipe';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule } from '@angular/router';
 import { Post } from '../../../core/models/post.model';
@@ -16,6 +17,7 @@ import { AuthService } from '../../../core/services/auth.service';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
+    AvatarPipe,
     MatMenuModule,
     RouterModule
   ],

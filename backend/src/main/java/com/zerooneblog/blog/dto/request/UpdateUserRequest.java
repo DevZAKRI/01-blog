@@ -18,5 +18,5 @@ public class UpdateUserRequest {
     @Size(max = 1000)
     private String bio;
 
-    private String avatarUrl;
+    private String avatar;
 }

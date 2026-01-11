@@ -27,7 +27,10 @@ public class NotificationController {
         this.userRepository = userRepository;
     }
 
-    private User currentUser(Authentication auth) { return userRepository.findByUsername(auth.getName()).orElseThrow(); }
+    private User currentUser(Authentication auth) {
+        if (auth == null || auth.getName() == null) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED);
+        return userRepository.findByUsername(auth.getName()).orElseThrow();
+    }
 
     @GetMapping
     public org.springframework.data.domain.Page<NotificationDto> list(Authentication auth, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {

@@ -43,11 +43,22 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Avatar URL</label>
-          <mat-form-field appearance="outline" class="full-width">
-            <input matInput formControlName="avatar" placeholder="https://example.com/avatar.jpg">
-            <mat-icon matSuffix>image</mat-icon>
-          </mat-form-field>
+          <label class="form-label">Avatar</label>
+          <div class="avatar-row">
+            <img [src]="previewUrl || (authService.getCurrentUser() | avatar:'120x120')" alt="avatar preview" class="avatar-preview">
+            <div class="avatar-actions">
+              <input type="file" #avatarFileInput (change)="onFileSelected($event)" accept="image/*" hidden>
+              <button mat-stroked-button type="button" (click)="triggerFileSelect()">Choose File</button>
+              <button mat-stroked-button type="button" (click)="uploadAvatar()" [disabled]="!selectedFile || uploading">
+                Upload
+              </button>
+              <mat-form-field appearance="outline" class="full-width">
+                <input matInput formControlName="avatar" placeholder="Or paste an image URL">
+                <mat-icon matSuffix>link</mat-icon>
+              </mat-form-field>
+              <div *ngIf="uploading" class="uploading">Uploading...</div>
+            </div>
+          </div>
         </div>
 
         <div class="form-actions">

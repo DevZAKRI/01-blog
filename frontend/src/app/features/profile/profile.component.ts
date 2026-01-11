@@ -12,7 +12,9 @@ import { UserService } from '../../core/services/user.service';
 import { PostService } from '../../core/services/post.service';
 import { ReportService } from '../../core/services/report.service';
 import { AuthService } from '../../core/services/auth.service';
+import { environment } from '../../../environments/environment';
 import { User } from '../../core/models/user.model';
+import { AvatarPipe } from '../../core/pipes/avatar.pipe';
 import { Post } from '../../core/models/post.model';
 import { CreatePostDialogComponent } from '../post/create-post-dialog/create-post-dialog.component';
 import { CommentDialogComponent } from '../post/comment-dialog/comment-dialog.component';
@@ -29,12 +31,14 @@ import { ReportDialogComponent } from '../report/report-dialog/report-dialog.com
     MatProgressSpinnerModule,
     MatDialogModule,
     MatSnackBarModule,
-    PostCardComponent
+    PostCardComponent,
+    AvatarPipe
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
 export class ProfileComponent implements OnInit {
+  readonly environment = environment;
   user: User | null = null;
   posts: Post[] = [];
   isLoading = true;
@@ -192,5 +196,11 @@ export class ProfileComponent implements OnInit {
 
   onEdit(post: Post): void {
     this.snackBar.open('Edit functionality coming soon!', 'Close', { duration: 3000 });
+  }
+
+  onAvatarError(ev: Event, user: User | null): void {
+    const img = ev.target as HTMLImageElement;
+    const u = user?.username || 'unknown';
+    img.src = `https://robohash.org/${encodeURIComponent(u)}.png?size=240x240`;
   }
 }

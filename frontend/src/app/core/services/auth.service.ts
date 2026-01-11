@@ -62,9 +62,27 @@ export class AuthService {
     return user?.role === 'ADMIN';
   }
 
-  private handleAuth(response: AuthResponse): void {
-    localStorage.setItem('accessToken', response.accessToken);
-    localStorage.setItem('currentUser', JSON.stringify(response.user));
-    this.currentUserSubject.next(response.user);
+  private handleAuth(response: Partial<AuthResponse> & any): void {
+    // backend previously returned { token }, newer version returns { accessToken, user }
+    const token = response.accessToken ?? response.token;
+    const user = response.user ?? null;
+
+    if (token) {
+      localStorage.setItem('accessToken', token);
+    }
+
+    if (user) {
+      // normalize avatar field coming from backend: support both avatarUrl and avatar
+      if (!user.avatar && user.avatarUrl) user.avatar = user.avatarUrl;
+      // if it's a server-relative path like /uploads/..., prefix with apiUrl
+      if (user.avatar && user.avatar.startsWith('/uploads')) user.avatar = environment.apiUrl + user.avatar;
+
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      this.currentUserSubject.next(user);
+    } else {
+      // clear user if not provided
+      localStorage.removeItem('currentUser');
+      this.currentUserSubject.next(null);
+    }
   }
 }

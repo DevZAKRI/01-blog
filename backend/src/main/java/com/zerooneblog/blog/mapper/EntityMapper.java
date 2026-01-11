@@ -21,7 +21,7 @@ public class EntityMapper {
         d.setUsername(u.getUsername());
         d.setEmail(u.getEmail());
         d.setBio(u.getBio());
-        d.setAvatarUrl(u.getAvatarUrl());
+        d.setAvatar(u.getAvatarUrl() == null || u.getAvatarUrl().isBlank() ? "/uploads/default-avatar.svg" : u.getAvatarUrl());
         d.setBanned(u.isBanned());
         d.setCreatedAt(u.getCreatedAt());
         d.setRole(u.getRole());

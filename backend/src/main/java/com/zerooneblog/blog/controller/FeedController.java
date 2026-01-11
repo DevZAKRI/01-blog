@@ -27,12 +27,14 @@ public class FeedController {
 
     @GetMapping
     public org.springframework.data.domain.Page<com.zerooneblog.blog.dto.response.PostDto> feed(Authentication auth, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+        if (auth == null || auth.getName() == null) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED);
         User u = userRepository.findByUsername(auth.getName()).orElseThrow();
         return postService.feedFor(u, PageRequest.of(page, size)).map(com.zerooneblog.blog.mapper.EntityMapper::toDto);
     }
 
     @GetMapping("/{authorId}")
     public org.springframework.data.domain.Page<com.zerooneblog.blog.dto.response.PostDto> feedForAuthor(@PathVariable Long authorId, Authentication auth, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+        if (auth == null || auth.getName() == null) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED);
         User u = userRepository.findByUsername(auth.getName()).orElseThrow();
         return userService.listPostsForSubscription(u, authorId, PageRequest.of(page, size)).map(com.zerooneblog.blog.mapper.EntityMapper::toDto);
     }

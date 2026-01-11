@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -9,6 +9,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
+import { UploadService } from '../../core/services/upload.service';
+import { environment } from '../../../environments/environment';
+import { AvatarPipe } from '../../core/pipes/avatar.pipe';
 
 @Component({
   selector: 'app-settings',
@@ -21,7 +24,8 @@ import { UserService } from '../../core/services/user.service';
     MatInputModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    AvatarPipe
   ],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.css']
@@ -29,11 +33,16 @@ import { UserService } from '../../core/services/user.service';
 export class SettingsComponent implements OnInit {
   profileForm: FormGroup;
   isLoading = false;
+  @ViewChild('avatarFileInput') avatarFileInput!: ElementRef<HTMLInputElement>;
+  selectedFile?: File;
+  previewUrl?: string;
+  uploading = false;
 
   constructor(
     private fb: FormBuilder,
-    private authService: AuthService,
+    public authService: AuthService,
     private userService: UserService,
+    private uploadService: UploadService,
     private snackBar: MatSnackBar
   ) {
     this.profileForm = this.fb.group({
@@ -47,6 +56,8 @@ export class SettingsComponent implements OnInit {
   ngOnInit(): void {
     const currentUser = this.authService.getCurrentUser();
     if (currentUser) {
+      // normalize preview URL if needed
+      this.previewUrl = this.resolveAvatarUrl(currentUser.avatar);
       this.profileForm.patchValue({
         username: currentUser.username,
         fullName: currentUser.fullName || '',
@@ -64,7 +75,13 @@ export class SettingsComponent implements OnInit {
           const currentUser = this.authService.getCurrentUser();
           if (currentUser) {
             Object.assign(currentUser, updatedUser);
+            // ensure avatar is normalized for UI
+            currentUser.avatar = updatedUser.avatar || currentUser.avatar;
+            if (currentUser.avatar && currentUser.avatar.startsWith('/uploads')) {
+              currentUser.avatar = environment.apiUrl + currentUser.avatar;
+            }
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            this.previewUrl = this.resolveAvatarUrl(currentUser.avatar);
           }
           this.isLoading = false;
           this.snackBar.open('Profile updated successfully!', 'Close', { duration: 3000 });
@@ -75,5 +92,46 @@ export class SettingsComponent implements OnInit {
         }
       });
     }
+  }
+
+  onFileSelected(ev: Event): void {
+    const input = ev.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    this.selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = () => this.previewUrl = reader.result as string;
+    reader.readAsDataURL(file);
+    // auto-upload
+    this.uploadAvatar();
+  }
+
+  uploadAvatar(): void {
+    if (!this.selectedFile) return;
+    this.uploading = true;
+    this.uploadService.upload(this.selectedFile).subscribe({
+      next: (res) => {
+        // server returns { path: '/uploads/...' }
+        this.profileForm.patchValue({ avatar: res.path });
+        this.uploading = false;
+        // update preview to full url for client
+        this.previewUrl = res.path.startsWith('/uploads') ? environment.apiUrl + res.path : res.path;
+        this.snackBar.open('Avatar uploaded. Remember to Save Changes.', 'Close', { duration: 3000 });
+      },
+      error: () => {
+        this.uploading = false;
+        this.snackBar.open('Avatar upload failed', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  triggerFileSelect(): void {
+    // Programmatically open the hidden file input
+    this.avatarFileInput.nativeElement.click();
+  }
+
+  resolveAvatarUrl(val?: string): string {
+    if (!val) return '';
+    return val.startsWith('/uploads') ? environment.apiUrl + val : val;
   }
 }

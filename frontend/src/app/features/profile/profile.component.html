@@ -2,9 +2,10 @@
   <div class="profile-header-card">
     <div class="profile-banner"></div>
     <div class="profile-content">
-      <img [src]="user.avatar || 'https://via.placeholder.com/120'"
+      <img [src]="user | avatar:'240x240'"
            alt="Profile Avatar"
-           class="profile-avatar">
+           class="profile-avatar"
+           (error)="onAvatarError($event, user)">
       <div class="profile-info">
         <div class="profile-name-section">
           <h1>{{ user.username }}</h1>

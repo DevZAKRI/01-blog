@@ -79,7 +79,14 @@
 .full-width ::ng-deep input,
 .full-width ::ng-deep textarea {
   font-size: 15px;
+  text-align: left; /* ensure input text is left-aligned */
+  direction: ltr;
 }
+
+.avatar-row { display:flex; gap: 12px; align-items: center; }
+.avatar-preview { width: 72px; height: 72px; object-fit: cover; border-radius: 50%; border: 1px solid #ddd }
+.avatar-actions { flex: 1; display:flex; flex-direction: column; gap: 8px }
+.uploading { font-size: 13px; color: #666 }
 
 .form-actions {
   display: flex;

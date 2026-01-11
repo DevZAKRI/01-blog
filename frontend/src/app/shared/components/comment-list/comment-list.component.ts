@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { Comment } from '../../../core/models/comment.model';
+import { AvatarPipe } from '../../../core/pipes/avatar.pipe';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -15,6 +16,7 @@ import { AuthService } from '../../../core/services/auth.service';
     MatListModule,
     MatButtonModule,
     MatIconModule,
+    AvatarPipe,
     RouterModule
   ],
   templateUrl: './comment-list.component.html',

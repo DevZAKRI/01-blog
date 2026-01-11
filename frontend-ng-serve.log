@@ -1,0 +1,117 @@
+❯ Building...
+● [DEBUG] This "import" expression will not be bundled because the argument is not a string literal [unsupported-dynamic-import]
+
+    src/main.ts:26:69:
+      26 │ ...ain.ts%40App"; function App_HmrLoad(t) { import(/* @vite-ignore */
+         ╵                                             ~~~~~~
+
+● [DEBUG] This "import" expression will not be bundled because the argument is not a string literal [unsupported-dynamic-import]
+
+    src/app/features/auth/register/register.component.ts:219:146:
+      219 │ ...function RegisterComponent_HmrLoad(t) { import(/* @vite-ignore */
+          ╵                                            ~~~~~~
+
+● [DEBUG] This "import" expression will not be bundled because the argument is not a string literal [unsupported-dynamic-import]
+
+    src/app/features/notifications/notifications.component.ts:191:159:
+      191 │ ...ion NotificationsComponent_HmrLoad(t) { import(/* @vite-ignore */
+          ╵                                            ~~~~~~
+
+● [DEBUG] This "import" expression will not be bundled because the argument is not a string literal [unsupported-dynamic-import]
+
+    src/app/features/feed/feed.component.ts:161:123:
+      161 │ ...t"; function FeedComponent_HmrLoad(t) { import(/* @vite-ignore */
+          ╵                                            ~~~~~~
+
+● [DEBUG] This "import" expression will not be bundled because the argument is not a string literal [unsupported-dynamic-import]
+
+    src/app/features/auth/login/login.component.ts:158:134:
+      158 │ ..."; function LoginComponent_HmrLoad(t) { import(/* @vite-ignore */
+          ╵                                            ~~~~~~
+
+● [DEBUG] This "import" expression will not be bundled because the argument is not a string literal [unsupported-dynamic-import]
+
+    src/app/features/settings/settings.component.ts:182:139:
+      182 │ ...function SettingsComponent_HmrLoad(t) { import(/* @vite-ignore */
+          ╵                                            ~~~~~~
+
+● [DEBUG] This "import" expression will not be bundled because the argument is not a string literal [unsupported-dynamic-import]
+
+    src/app/features/layout/layout.component.ts:203:131:
+      203 │ ...; function LayoutComponent_HmrLoad(t) { import(/* @vite-ignore */
+          ╵                                            ~~~~~~
+
+● [DEBUG] This "import" expression will not be bundled because the argument is not a string literal [unsupported-dynamic-import]
+
+    src/app/features/admin/admin.component.ts:657:127:
+      657 │ ..."; function AdminComponent_HmrLoad(t) { import(/* @vite-ignore */
+          ╵                                            ~~~~~~
+
+● [DEBUG] This "import" expression will not be bundled because the argument is not a string literal [unsupported-dynamic-import]
+
+    src/app/features/profile/profile.component.ts:347:135:
+      347 │ ... function ProfileComponent_HmrLoad(t) { import(/* @vite-ignore */
+          ╵                                            ~~~~~~
+
+● [DEBUG] This "import" expression will not be bundled because the argument is not a string literal [unsupported-dynamic-import]
+
+    src/app/features/post/create-post-dialog/create-post-dialog.component.ts:169:182:
+      169 │ ... CreatePostDialogComponent_HmrLoad(t) { import(/* @vite-ignore */
+          ╵                                            ~~~~~~
+
+● [DEBUG] This "import" expression will not be bundled because the argument is not a string literal [unsupported-dynamic-import]
+
+    src/app/features/post/comment-dialog/comment-dialog.component.ts:159:168:
+      159 │ ...ion CommentDialogComponent_HmrLoad(t) { import(/* @vite-ignore */
+          ╵                                            ~~~~~~
+
+● [DEBUG] This "import" expression will not be bundled because the argument is not a string literal [unsupported-dynamic-import]
+
+    src/app/features/report/report-dialog/report-dialog.component.ts:135:166:
+      135 │ ...tion ReportDialogComponent_HmrLoad(t) { import(/* @vite-ignore */
+          ╵                                            ~~~~~~
+
+● [DEBUG] This "import" expression will not be bundled because the argument is not a string literal [unsupported-dynamic-import]
+
+    src/app/shared/components/post-card/post-card.component.ts:228:152:
+      228 │ ...function PostCardComponent_HmrLoad(t) { import(/* @vite-ignore */
+          ╵                                            ~~~~~~
+
+● [DEBUG] This "import" expression will not be bundled because the argument is not a string literal [unsupported-dynamic-import]
+
+    src/app/shared/components/comment-list/comment-list.component.ts:119:164:
+      119 │ ...ction CommentListComponent_HmrLoad(t) { import(/* @vite-ignore */
+          ╵                                            ~~~~~~
+
+✔ Building...
+Initial chunk files                 | Names                   |  Raw size
+styles.css                          | styles                  | 111.69 kB | 
+main.js                             | main                    |   4.58 kB | 
+chunk-2I2TH4V4.js                   | -                       |   2.54 kB | 
+chunk-VMZPZDFY.js                   | -                       | 971 bytes | 
+polyfills.js                        | polyfills               |  95 bytes | 
+
+                                    | Initial total           | 119.88 kB
+
+Lazy chunk files                    | Names                   |  Raw size
+admin.component-JZQI65H6.js         | admin-component         |  49.54 kB | 
+chunk-GMLXY4CM.js                   | -                       |  47.08 kB | 
+profile.component-FXB6NT4X.js       | profile-component       |  42.08 kB | 
+register.component-6R7PB6KV.js      | register-component      |  24.48 kB | 
+layout.component-6ZHNCUFJ.js        | layout-component        |  22.95 kB | 
+settings.component-SDWXSI2D.js      | settings-component      |  20.09 kB | 
+notifications.component-AI52GGQV.js | notifications-component |  19.65 kB | 
+login.component-V2NQPKSW.js         | login-component         |  19.36 kB | 
+chunk-YA3HSIZR.js                   | -                       |  14.39 kB | 
+feed.component-MFERBUUS.js          | feed-component          |  13.41 kB | 
+chunk-X32KXNKO.js                   | -                       |   2.42 kB | 
+chunk-RZY6SYY3.js                   | -                       |   2.41 kB | 
+chunk-OWRH2XNP.js                   | -                       |   2.05 kB | 
+chunk-MV4VN5HH.js                   | -                       |   1.57 kB | 
+
+Application bundle generation complete. [2.048 seconds] - 2026-01-11T15:27:53.355Z
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+An unhandled exception occurred: crypto.hash is not a function
+See "/tmp/ng-bjEfmk/angular-errors.log" for further details.
