@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { UploadService } from '../../core/services/upload.service';
@@ -25,6 +26,7 @@ import { AvatarPipe } from '../../core/pipes/avatar.pipe';
     MatButtonModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    MatIconModule,
     AvatarPipe
   ],
   templateUrl: './settings.component.html',
@@ -78,9 +80,10 @@ export class SettingsComponent implements OnInit {
             // ensure avatar is normalized for UI
             currentUser.avatar = updatedUser.avatar || currentUser.avatar;
             if (currentUser.avatar && currentUser.avatar.startsWith('/uploads')) {
-              currentUser.avatar = environment.apiUrl + currentUser.avatar;
+              const apiRoot = environment.apiUrl.replace(/\/api\/v1\/?$/, '');
+              currentUser.avatar = apiRoot + currentUser.avatar;
             }
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            this.authService.updateCurrentUser(currentUser);
             this.previewUrl = this.resolveAvatarUrl(currentUser.avatar);
           }
           this.isLoading = false;
@@ -114,8 +117,9 @@ export class SettingsComponent implements OnInit {
         // server returns { path: '/uploads/...' }
         this.profileForm.patchValue({ avatar: res.path });
         this.uploading = false;
-        // update preview to full url for client
-        this.previewUrl = res.path.startsWith('/uploads') ? environment.apiUrl + res.path : res.path;
+        // update preview to full url for client (uploads are served at /uploads/** not under /api/v1)
+        const apiRoot = environment.apiUrl.replace(/\/api\/v1\/?$/, '');
+        this.previewUrl = res.path.startsWith('/uploads') ? apiRoot + res.path : res.path;
         this.snackBar.open('Avatar uploaded. Remember to Save Changes.', 'Close', { duration: 3000 });
       },
       error: () => {
@@ -132,6 +136,7 @@ export class SettingsComponent implements OnInit {
 
   resolveAvatarUrl(val?: string): string {
     if (!val) return '';
-    return val.startsWith('/uploads') ? environment.apiUrl + val : val;
+    const apiRoot = environment.apiUrl.replace(/\/api\/v1\/?$/, '');
+    return val.startsWith('/uploads') ? apiRoot + val : val;
   }
 }

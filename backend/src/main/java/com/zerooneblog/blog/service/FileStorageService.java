@@ -28,7 +28,11 @@ public class FileStorageService {
         if (file.getSize() > maxSize) throw new BadRequestException("File too large");
         if (!allowed.contains(file.getContentType())) throw new BadRequestException("Unsupported file type");
         try {
-            String filename = System.currentTimeMillis() + "-" + file.getOriginalFilename();
+            String original = file.getOriginalFilename() != null ? file.getOriginalFilename() : "file";
+            String ext = "";
+            int idx = original.lastIndexOf('.');
+            if (idx > 0) ext = original.substring(idx);
+            String filename = java.util.UUID.randomUUID().toString() + ext;
             Path target = uploadDir.resolve(filename);
             Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
             return "/uploads/" + filename;

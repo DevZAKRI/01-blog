@@ -37,6 +37,7 @@ import { Observable } from 'rxjs';
 })
 export class LayoutComponent implements OnInit {
   unreadCount$: Observable<number>;
+  currentUser$ = this.authService.currentUser$;
 
   constructor(
     public authService: AuthService,

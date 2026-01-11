@@ -22,15 +22,18 @@ export class AvatarPipe implements PipeTransform {
 
   private resolve(url: string): string {
     if (!url) return this.robo('unknown', '120x120');
-    // If the URL is already a full URL, return it as-is
-    if (url.startsWith(environment.apiUrl)) return url;
-    // If it's a server-relative uploads path, prefix with API URL
-    if (url.startsWith('/uploads')) return `${environment.apiUrl}${url}`;
-    // If it's an absolute http/https URL, return as-is
-    if (/^https?:\/\//i.test(url)) return url;
-    // Otherwise treat it as a relative path and prefix with API URL
+    // If the URL is already the full API URL or an absolute URL, return it as-is
+    if (url.startsWith(environment.apiUrl) || /^https?:\/\//i.test(url)) return url;
+
+    // Compute API root without the /api/v1 prefix so uploads are served from /uploads/**
+    const apiRoot = environment.apiUrl.replace(/\/api\/v1\/?$/, '');
+
+    // If it's a server-relative uploads path, prefix with API root
+    if (url.startsWith('/uploads')) return `${apiRoot}${url}`;
+
+    // Otherwise treat it as a relative path and prefix with API root
     const normalized = url.startsWith('/') ? url : `/${url}`;
-    return `${environment.apiUrl}${normalized}`;
+    return `${apiRoot}${normalized}`;
   }
 
   private robo(username: string, size: string) {

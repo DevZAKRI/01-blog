@@ -17,7 +17,10 @@ export class UserService {
       map((user) => {
         if (user) {
           if (!user.avatar && user.avatarUrl) user.avatar = user.avatarUrl;
-          if (user.avatar && user.avatar.startsWith('/uploads')) user.avatar = environment.apiUrl + user.avatar;
+          if (user.avatar && user.avatar.startsWith('/uploads')) {
+            const apiRoot = environment.apiUrl.replace(/\/api\/v1\/?$/, '');
+            user.avatar = apiRoot + user.avatar;
+          }
         }
         return user as User;
       })

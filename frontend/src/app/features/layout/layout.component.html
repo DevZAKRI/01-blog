@@ -5,7 +5,7 @@
         <mat-icon matListItemIcon>home</mat-icon>
         <span matListItemTitle>Home Feed</span>
       </a>
-      <a mat-list-item *ngIf="currentUser" [routerLink]="['/profile', currentUser?.id]" routerLinkActive="active">
+      <a mat-list-item *ngIf="currentUser$ | async as currentUser" [routerLink]="['/profile', currentUser?.id]" routerLinkActive="active">
         <mat-icon matListItemIcon>person</mat-icon>
         <span matListItemTitle>My Block</span>
       </a>
@@ -54,13 +54,13 @@
           <mat-icon>notifications</mat-icon>
         </button>
         <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-avatar-btn">
-          <img [src]="currentUser | avatar" alt="Avatar" class="user-avatar">
+          <img [src]="(currentUser$ | async) | avatar" alt="Avatar" class="user-avatar">
         </button>
       </div>
       <mat-menu #userMenu="matMenu">
-        <div class="user-menu-header">
-          <p class="user-name">{{ currentUser?.username }}</p>
-          <p class="user-email">{{ currentUser?.email }}</p>
+        <div class="user-menu-header" *ngIf="currentUser$ | async as currentUser">
+          <p class="user-name">{{ currentUser.username }}</p>
+          <p class="user-email">{{ currentUser.email }}</p>
         </div>
         <mat-divider></mat-divider>
         <button mat-menu-item *ngIf="currentUser" [routerLink]="['/profile', currentUser?.id]">
