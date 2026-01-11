@@ -12,6 +12,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { AvatarPipe } from '../../core/pipes/avatar.pipe';
+import { ToastComponent } from '../../shared/components/toast/toast.component';
 import { CreatePostDialogComponent } from '../post/create-post-dialog/create-post-dialog.component';
 import { Observable } from 'rxjs';
 
@@ -28,7 +29,8 @@ import { Observable } from 'rxjs';
     MatListModule,
     MatBadgeModule,
     MatMenuModule,
-    AvatarPipe
+    AvatarPipe,
+    ToastComponent
   ],
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.css']

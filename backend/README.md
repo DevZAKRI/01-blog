@@ -333,11 +333,10 @@ When controllers throw runtime exceptions, `GlobalExceptionHandler` returns a co
 
 ```json
 {
-   "timestamp": "2025-11-19T12:34:56.789Z",
-   "status": 404,
-   "error": "Not Found",
-   "message": "Post not found",
-   "path": "/api/v1/posts/999"
+  "status": 404,
+  "error": "Not Found",
+  "message": "Post not found",
+  "timestamp": 167342342342
 }
 ```
 

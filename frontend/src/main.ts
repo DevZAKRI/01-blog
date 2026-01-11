@@ -6,6 +6,7 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { routes } from './app/app.routes';
 import { authInterceptor } from './app/core/interceptors/auth.interceptor';
+import { errorInterceptor } from './app/core/interceptors/error.interceptor';
 
 @Component({
   selector: 'app-root',
@@ -18,7 +19,8 @@ export class App {}
 bootstrapApplication(App, {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
+
     provideAnimations()
   ]
 }).catch(err => console.error(err));
