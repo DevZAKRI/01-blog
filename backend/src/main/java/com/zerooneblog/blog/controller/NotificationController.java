@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zerooneblog.blog.dto.response.NotificationDto;
 import com.zerooneblog.blog.mapper.EntityMapper;
 import com.zerooneblog.blog.model.User;
 import com.zerooneblog.blog.repository.UserRepository;
@@ -33,8 +32,16 @@ public class NotificationController {
     }
 
     @GetMapping
-    public org.springframework.data.domain.Page<NotificationDto> list(Authentication auth, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
-        return notificationService.list(currentUser(auth), PageRequest.of(page, size)).map(EntityMapper::toDto);
+    public org.springframework.http.ResponseEntity<?> list(Authentication auth, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+        var result = notificationService.list(currentUser(auth), PageRequest.of(page, size)).map(EntityMapper::toDto);
+        if (result.getTotalElements() == 0) {
+            return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
+                "message", "No notifications yet",
+                "content", result.getContent(),
+                "totalElements", result.getTotalElements()
+            ));
+        }
+        return org.springframework.http.ResponseEntity.ok(result);
     }
 
     @PostMapping("/{id}/read")

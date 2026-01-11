@@ -58,11 +58,19 @@ public class UserController {
     }
 
     @GetMapping("/{authorId}/posts")
-    public Object listPostsForSubscribedAuthor(@PathVariable Long authorId, Authentication auth,
+    public org.springframework.http.ResponseEntity<?> listPostsForSubscribedAuthor(@PathVariable Long authorId, Authentication auth,
                                                @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         User owner = userService.findByUsername(auth.getName());
         // will throw if not subscribed
-        return userService.listPostsForSubscription(owner, authorId, PageRequest.of(page, size)).map(com.zerooneblog.blog.mapper.EntityMapper::toDto);
+        var result = userService.listPostsForSubscription(owner, authorId, PageRequest.of(page, size)).map(com.zerooneblog.blog.mapper.EntityMapper::toDto);
+        if (result.getTotalElements() == 0) {
+            return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
+                "message", "No posts found for this author",
+                "content", result.getContent(),
+                "totalElements", result.getTotalElements()
+            ));
+        }
+        return org.springframework.http.ResponseEntity.ok(result);
     }
 
     @PutMapping("/me")
