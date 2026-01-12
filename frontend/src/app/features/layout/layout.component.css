@@ -24,6 +24,12 @@
   align-items: center;
   gap: 8px;
   margin-right: 48px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.toolbar-logo:hover {
+  text-decoration: none;
 }
 
 .logo-icon {

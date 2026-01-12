@@ -17,6 +17,7 @@ import com.zerooneblog.blog.dto.request.RegisterRequest;
 import com.zerooneblog.blog.dto.response.AuthResponse;
 import com.zerooneblog.blog.model.User;
 import com.zerooneblog.blog.repository.UserRepository;
+import com.zerooneblog.blog.util.HtmlSanitizer;
 import com.zerooneblog.blog.util.JwtUtil;
 
 import jakarta.validation.Valid;
@@ -29,13 +30,16 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final HtmlSanitizer htmlSanitizer;
 
     public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                          AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+                          AuthenticationManager authenticationManager, JwtUtil jwtUtil,
+                          HtmlSanitizer htmlSanitizer) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.htmlSanitizer = htmlSanitizer;
     }
 
     @PostMapping("/register")
@@ -49,7 +53,7 @@ public class AuthController {
         }
 
         User user = new User();
-        user.setUsername(body.getUsername());
+        user.setUsername(htmlSanitizer.sanitizePlainText(body.getUsername()));
         user.setPassword(passwordEncoder.encode(body.getPassword()));
         user.setEmail(body.getEmail());
         // Default role is USER (set in entity)

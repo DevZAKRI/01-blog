@@ -19,14 +19,17 @@ public class PostService {
     private final NotificationService notificationService;
     private final com.zerooneblog.blog.repository.SubscriptionRepository subscriptionRepository;
     private final com.zerooneblog.blog.repository.UserRepository userRepository;
+    private final com.zerooneblog.blog.util.HtmlSanitizer htmlSanitizer;
 
     public PostService(PostRepository postRepository, NotificationService notificationService,
                       com.zerooneblog.blog.repository.SubscriptionRepository subscriptionRepository,
-                      com.zerooneblog.blog.repository.UserRepository userRepository) {
+                      com.zerooneblog.blog.repository.UserRepository userRepository,
+                      com.zerooneblog.blog.util.HtmlSanitizer htmlSanitizer) {
         this.postRepository = postRepository;
         this.notificationService = notificationService;
         this.subscriptionRepository = subscriptionRepository;
         this.userRepository = userRepository;
+        this.htmlSanitizer = htmlSanitizer;
     }
 
     public Post create(Post p) {
@@ -34,6 +37,15 @@ public class PostService {
         if (p.getAuthor() != null && p.getAuthor().isBanned()) {
             logger.severe("[PostService] ERROR: Author is banned");
             throw new NotFoundException("User not found");
+        }
+        
+        // Sanitize user input to prevent XSS
+        logger.info("[PostService] create() - Step 1.5: Sanitizing input");
+        if (p.getTitle() != null) {
+            p.setTitle(htmlSanitizer.sanitizePlainText(p.getTitle()));
+        }
+        if (p.getDescription() != null) {
+            p.setDescription(htmlSanitizer.sanitizeRichText(p.getDescription()));
         }
         
         logger.info("[PostService] create() - Step 2: Saving post to database");
@@ -90,8 +102,9 @@ public class PostService {
             logger.severe("[PostService] edit() - User not authorized to edit post");
             throw new NotFoundException("Post not found");
         }
-        existing.setTitle(updated.getTitle());
-        existing.setDescription(updated.getDescription());
+        // Sanitize user input
+        existing.setTitle(htmlSanitizer.sanitizePlainText(updated.getTitle()));
+        existing.setDescription(htmlSanitizer.sanitizeRichText(updated.getDescription()));
         existing.setMediaUrls(updated.getMediaUrls());
         Post saved = postRepository.save(existing);
         logger.info("[PostService] edit() - Post edited successfully");

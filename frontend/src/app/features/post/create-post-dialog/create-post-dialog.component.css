@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  min-width: 500px;
+  min-width: 300px;
   max-width: 100%;
 }
 
@@ -409,4 +409,42 @@ mat-spinner {
 
 .status-badge.pending {
   background-color: #ff9800;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 600px) {
+  .post-form {
+    min-width: unset;
+    gap: 12px;
+  }
+
+  .description-textarea {
+    min-height: 100px;
+  }
+
+  .preview-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .media-label {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .lightbox-content {
+    max-width: 95%;
+    max-height: 70%;
+  }
+
+  .lightbox-nav {
+    width: 36px;
+    height: 36px;
+  }
+
+  .lightbox-nav mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
 }

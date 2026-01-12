@@ -19,11 +19,15 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final NotificationService notificationService;
+    private final com.zerooneblog.blog.util.HtmlSanitizer htmlSanitizer;
 
-    public CommentService(CommentRepository commentRepository, PostRepository postRepository, NotificationService notificationService) {
+    public CommentService(CommentRepository commentRepository, PostRepository postRepository, 
+                         NotificationService notificationService, 
+                         com.zerooneblog.blog.util.HtmlSanitizer htmlSanitizer) {
         this.commentRepository = commentRepository;
         this.postRepository = postRepository;
         this.notificationService = notificationService;
+        this.htmlSanitizer = htmlSanitizer;
     }
 
     public Comment addComment(Long postId, User user, String text) {
@@ -38,7 +42,7 @@ public class CommentService {
         Comment c = new Comment();
         c.setPost(post);
         c.setUser(user);
-        c.setText(text);
+        c.setText(htmlSanitizer.sanitizePlainText(text));
         
         logger.info("[CommentService] addComment() - Step 4: Saving comment to database");
         Comment saved = commentRepository.save(c);

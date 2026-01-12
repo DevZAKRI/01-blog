@@ -14,6 +14,7 @@ import com.zerooneblog.blog.model.User;
 import com.zerooneblog.blog.repository.PostRepository;
 import com.zerooneblog.blog.repository.SubscriptionRepository;
 import com.zerooneblog.blog.repository.UserRepository;
+import com.zerooneblog.blog.util.HtmlSanitizer;
 
 @Service
 public class UserService {
@@ -22,15 +23,17 @@ public class UserService {
     private final SubscriptionRepository subscriptionRepository;
     private final NotificationService notificationService;
     private final PasswordEncoder passwordEncoder;
+    private final HtmlSanitizer htmlSanitizer;
 
     public UserService(UserRepository userRepository, PostRepository postRepository, 
                       SubscriptionRepository subscriptionRepository, NotificationService notificationService, 
-                      PasswordEncoder passwordEncoder) {
+                      PasswordEncoder passwordEncoder, HtmlSanitizer htmlSanitizer) {
         this.userRepository = userRepository;
         this.postRepository = postRepository;
         this.subscriptionRepository = subscriptionRepository;
         this.notificationService = notificationService;
         this.passwordEncoder = passwordEncoder;
+        this.htmlSanitizer = htmlSanitizer;
     }
 
     @Transactional(readOnly = true)
@@ -126,10 +129,14 @@ public class UserService {
     }
 
     public User updateProfile(User user, UpdateUserRequest req) {
-        if (req.getUsername() != null && !req.getUsername().isBlank()) user.setUsername(req.getUsername());
+        if (req.getUsername() != null && !req.getUsername().isBlank()) {
+            user.setUsername(htmlSanitizer.sanitizePlainText(req.getUsername()));
+        }
         if (req.getEmail() != null && !req.getEmail().isBlank()) user.setEmail(req.getEmail());
         if (req.getPassword() != null && !req.getPassword().isBlank()) user.setPassword(passwordEncoder.encode(req.getPassword()));
-        if (req.getBio() != null) user.setBio(req.getBio());
+        if (req.getBio() != null) {
+            user.setBio(htmlSanitizer.sanitizePlainText(req.getBio()));
+        }
         if (req.getAvatar() != null) user.setAvatarUrl(req.getAvatar());
         return userRepository.save(user);
     }

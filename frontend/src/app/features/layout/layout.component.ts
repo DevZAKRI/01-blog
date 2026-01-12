@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -71,7 +72,8 @@ export class LayoutComponent implements OnInit {
   onCreatePost(): void {
     this.dialog.open(CreatePostDialogComponent, {
       width: '700px',
-      maxWidth: '90vw'
+      maxWidth: '95vw',
+      maxHeight: '90vh'
     });
   }
 }

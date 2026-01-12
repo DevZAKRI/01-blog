@@ -136,7 +136,9 @@ export class ProfileComponent implements OnInit {
 
   onCreatePost(): void {
     const dialogRef = this.dialog.open(CreatePostDialogComponent, {
-      width: '600px'
+      width: '600px',
+      maxWidth: '95vw',
+      maxHeight: '90vh'
     });
 
     dialogRef.afterClosed().subscribe(result => {
