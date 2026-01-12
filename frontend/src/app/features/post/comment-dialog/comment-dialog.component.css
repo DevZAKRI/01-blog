@@ -1,7 +1,29 @@
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: 12px !important;
+}
+
 .comments-container {
-  max-height: 400px;
+  max-height: 450px;
   overflow-y: auto;
   margin-bottom: 20px;
+  padding-right: 8px;
+}
+
+.comments-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.comments-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.comments-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.comments-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .loading {
@@ -10,17 +32,46 @@
   padding: 40px;
 }
 
+.no-comments {
+  text-align: center;
+  padding: 32px 16px;
+  color: #888;
+}
+
+.no-comments p {
+  margin: 0;
+  font-size: 14px;
+}
+
 .comment-form {
-  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
   padding-top: 16px;
+}
+
+.comment-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .full-width {
   width: 100%;
-  margin-bottom: 12px;
+}
+
+::ng-deep .comment-form .mat-mdc-form-field-subscript-wrapper {
+  margin-bottom: 0;
+}
+
+.comment-form button[type="submit"] {
+  align-self: flex-end;
+  min-width: 100px;
 }
 
 button mat-spinner {
   display: inline-block;
   margin-right: 8px;
+}
+
+::ng-deep mat-dialog-actions {
+  padding: 8px 24px 16px !important;
 }

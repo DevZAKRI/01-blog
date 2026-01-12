@@ -26,8 +26,6 @@ export class CommentListComponent {
   @Input() comments: Comment[] = [];
   @Input() postId: string = '';
   @Output() delete = new EventEmitter<string>();
-  @Output() like = new EventEmitter<string>();
-  @Output() unlike = new EventEmitter<string>();
 
   constructor(public authService: AuthService) {}
 
@@ -38,14 +36,6 @@ export class CommentListComponent {
 
   onDelete(commentId: string): void {
     this.delete.emit(commentId);
-  }
-
-  onLike(commentId: string): void {
-    this.like.emit(commentId);
-  }
-
-  onUnlike(commentId: string): void {
-    this.unlike.emit(commentId);
   }
 
   getTimeSince(dateString: string): string {

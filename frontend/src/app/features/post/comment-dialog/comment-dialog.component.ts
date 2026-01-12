@@ -108,28 +108,6 @@ export class CommentDialogComponent implements OnInit {
     }
   }
 
-  onLikeComment(commentId: string): void {
-    this.commentService.likeComment(this.data.postId, commentId).subscribe({
-      next: () => {
-        this.snackBar.open('Comment liked!', 'Close', { duration: 2000 });
-      },
-      error: () => {
-        this.snackBar.open('Failed to like comment', 'Close', { duration: 3000 });
-      }
-    });
-  }
-
-  onUnlikeComment(commentId: string): void {
-    this.commentService.unlikeComment(this.data.postId, commentId).subscribe({
-      next: () => {
-        this.snackBar.open('Like removed', 'Close', { duration: 2000 });
-      },
-      error: () => {
-        this.snackBar.open('Failed to unlike comment', 'Close', { duration: 3000 });
-      }
-    });
-  }
-
   onClose(): void {
     this.dialogRef.close(this.comments.length > 0);
   }

@@ -13,15 +13,10 @@
         </div>
         <div class="comment-actions">
           <button mat-icon-button
-                  (click)="onLike(comment.id)"
-                  title="Like this comment"
-                  class="like-btn">
-            <mat-icon>favorite_border</mat-icon>
-          </button>
-          <button mat-icon-button
                   *ngIf="isOwner(comment) || authService.isAdmin()"
                   (click)="onDelete(comment.id)"
-                  title="Delete comment">
+                  title="Delete comment"
+                  class="delete-btn">
             <mat-icon>delete</mat-icon>
           </button>
         </div>

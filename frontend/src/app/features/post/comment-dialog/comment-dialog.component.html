@@ -4,9 +4,7 @@
     <app-comment-list
       [comments]="comments"
       [postId]="data.postId"
-      (delete)="onDeleteComment($event)"
-      (like)="onLikeComment($event)"
-      (unlike)="onUnlikeComment($event)">
+      (delete)="onDeleteComment($event)">
     </app-comment-list>
 
     <div class="loading" *ngIf="isLoading">

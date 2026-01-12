@@ -30,16 +30,4 @@ export class CommentService {
   deleteComment(postId: string, commentId: string): Observable<void> {
     return this.http.delete<void>(`${environment.apiUrl}/posts/${postId}/comments/${commentId}`);
   }
-
-  likeComment(postId: string, commentId: string): Observable<void> {
-    return this.http.post<void>(`${environment.apiUrl}/posts/${postId}/comments/${commentId}/like`, {});
-  }
-
-  unlikeComment(postId: string, commentId: string): Observable<void> {
-    return this.http.delete<void>(`${environment.apiUrl}/posts/${postId}/comments/${commentId}/like`);
-  }
-
-  getCommentLikesCount(postId: string, commentId: string): Observable<number> {
-    return this.http.get<number>(`${environment.apiUrl}/posts/${postId}/comments/${commentId}/likes/count`);
-  }
 }

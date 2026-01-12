@@ -1,29 +1,34 @@
 mat-list {
   width: 100%;
+  padding: 0;
 }
 
 .comment-item {
   min-height: auto !important;
   height: auto !important;
   padding: 12px 0 !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .comment-item:last-child {
   border-bottom: none;
 }
 
+::ng-deep .comment-item .mdc-list-item__content {
+  overflow: visible !important;
+}
+
 .comment-container {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .comment-header {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
   width: 100%;
 }
 
@@ -38,48 +43,72 @@ mat-list {
 .comment-info {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  align-items: baseline;
+  gap: 8px;
   min-width: 0;
 }
 
 .comment-author {
-  font-weight: 500;
-  color: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  color: #1a1a1a;
   text-decoration: none;
-  word-break: break-word;
 }
 
 .comment-author:hover {
-  text-decoration: underline;
+  color: #00bcd4;
 }
 
 .comment-time {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.6);
+  font-size: 11px;
+  color: #999;
 }
 
 .comment-actions {
-  display: flex;
-  gap: 4px;
   flex-shrink: 0;
 }
 
-.comment-actions button {
-  width: 32px;
-  height: 32px;
+::ng-deep .comment-actions .delete-btn {
+  width: 24px !important;
+  height: 24px !important;
+  padding: 0 !important;
+  line-height: 24px !important;
+  background: none !important;
+  border: none !important;
+  color: #bbb;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+::ng-deep .comment-actions .delete-btn .mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+}
+
+.comment-item:hover ::ng-deep .comment-actions .delete-btn {
+  opacity: 1;
+}
+
+::ng-deep .comment-actions .delete-btn:hover {
+  color: #e53935;
+  background: none !important;
 }
 
 .comment-text {
   margin: 0;
-  padding-left: 44px;
-  white-space: pre-wrap;
+  padding-left: 42px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #333;
   word-break: break-word;
-  overflow-wrap: break-word;
-  color: rgba(0, 0, 0, 0.87);
 }
 
 .no-comments {
-  color: rgba(0, 0, 0, 0.6);
+  color: #999;
   font-style: italic;
-  margin: 16px 0;
+  text-align: center;
+  padding: 20px 0;
+  font-size: 14px;
 }
