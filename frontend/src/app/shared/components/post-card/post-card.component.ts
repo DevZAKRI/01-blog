@@ -9,6 +9,7 @@ import { RouterModule } from '@angular/router';
 import { Post } from '../../../core/models/post.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { PostService } from '../../../core/services/post.service';
+import { UploadService } from '../../../core/services/upload.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
@@ -36,9 +37,16 @@ export class PostCardComponent {
 
   isLikingInProgress = false;
 
+  // Lightbox state
+  lightboxOpen = false;
+  lightboxUrl = '';
+  lightboxType: 'image' | 'video' = 'image';
+  lightboxIndex = 0;
+
   constructor(
     public authService: AuthService,
     private postService: PostService,
+    private uploadService: UploadService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -113,9 +121,14 @@ export class PostCardComponent {
   }
 
   getMediaType(url: string): 'image' | 'video' {
-    if (!url) return 'image';
-    const ext = url.split('.').pop()?.toLowerCase();
-    return (ext === 'mp4' || ext === 'webm' || ext === 'ogg' || ext === 'mov') ? 'video' : 'image';
+    return this.uploadService.getMediaTypeFromUrl(url);
+  }
+
+  /**
+   * Get the full URL for a media item
+   */
+  getMediaUrl(url: string): string {
+    return this.uploadService.getFullUrl(url);
   }
 
   onImageError(event: Event): void {
@@ -139,5 +152,46 @@ export class PostCardComponent {
 
   isValidUrl(url: string): boolean {
     return !!url && url.trim().length > 0 && (url.startsWith('http') || url.startsWith('/'));
+  }
+
+  // Lightbox methods
+  openLightbox(index: number): void {
+    if (!this.post.mediaUrls || index >= this.post.mediaUrls.length) return;
+    const url = this.post.mediaUrls[index];
+    this.lightboxUrl = this.getMediaUrl(url);
+    this.lightboxType = this.getMediaType(url);
+    this.lightboxIndex = index;
+    this.lightboxOpen = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeLightbox(): void {
+    this.lightboxOpen = false;
+    this.lightboxUrl = '';
+    document.body.style.overflow = '';
+  }
+
+  prevMedia(event: Event): void {
+    event.stopPropagation();
+    if (!this.post.mediaUrls) return;
+    const newIndex = this.lightboxIndex - 1;
+    if (newIndex >= 0) {
+      this.openLightbox(newIndex);
+    }
+  }
+
+  nextMedia(event: Event): void {
+    event.stopPropagation();
+    if (!this.post.mediaUrls) return;
+    const newIndex = this.lightboxIndex + 1;
+    if (newIndex < this.post.mediaUrls.length) {
+      this.openLightbox(newIndex);
+    }
+  }
+
+  onLightboxBackdropClick(event: MouseEvent): void {
+    if ((event.target as HTMLElement).classList.contains('lightbox-overlay')) {
+      this.closeLightbox();
+    }
   }
 }

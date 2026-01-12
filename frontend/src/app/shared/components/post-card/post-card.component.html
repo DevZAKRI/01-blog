@@ -29,104 +29,155 @@
   <div class="post-media-gallery" *ngIf="post.mediaUrls && post.mediaUrls.length > 0">
     <!-- Single Media -->
     <div class="media-container single" *ngIf="post.mediaUrls.length === 1">
-      <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'"
-           [src]="post.mediaUrls[0]"
-           alt="Post image"
-           class="post-image"
-           loading="lazy"
-           (error)="onImageError($event)">
-      <video *ngIf="getMediaType(post.mediaUrls[0]) === 'video'"
-             [src]="post.mediaUrls[0]"
-             controls
-             class="post-video"
-             preload="metadata"
-             (error)="onVideoError($event)"></video>
+      <div class="media-item-wrapper" (click)="openLightbox(0)">
+        <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'"
+             [src]="getMediaUrl(post.mediaUrls[0])"
+             alt="Post image"
+             class="post-image clickable"
+             loading="lazy"
+             (error)="onImageError($event)">
+        <div *ngIf="getMediaType(post.mediaUrls[0]) === 'video'" class="video-thumbnail-wrapper">
+          <video [src]="getMediaUrl(post.mediaUrls[0])"
+                 class="post-video clickable"
+                 preload="metadata"
+                 (error)="onVideoError($event)"></video>
+          <div class="play-overlay"><mat-icon>play_circle</mat-icon></div>
+        </div>
+        <div class="zoom-hint"><mat-icon>zoom_in</mat-icon></div>
+      </div>
     </div>
 
     <!-- Two Media Items -->
     <div class="media-container two-images" *ngIf="post.mediaUrls.length === 2">
-      <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'"
-           [src]="post.mediaUrls[0]"
-           alt="Post image 1"
-           class="post-image"
-           loading="lazy"
-           (error)="onImageError($event)">
-      <video *ngIf="getMediaType(post.mediaUrls[0]) === 'video'"
-             [src]="post.mediaUrls[0]"
-             controls
-             class="post-video"
-             preload="metadata"
-             (error)="onVideoError($event)"></video>
-      <img *ngIf="getMediaType(post.mediaUrls[1]) === 'image'"
-           [src]="post.mediaUrls[1]"
-           alt="Post image 2"
-           class="post-image"
-           loading="lazy"
-           (error)="onImageError($event)">
-      <video *ngIf="getMediaType(post.mediaUrls[1]) === 'video'"
-             [src]="post.mediaUrls[1]"
-             controls
-             class="post-video"
-             preload="metadata"
-             (error)="onVideoError($event)"></video>
+      <div class="media-item-wrapper" (click)="openLightbox(0)">
+        <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'"
+             [src]="getMediaUrl(post.mediaUrls[0])"
+             alt="Post image 1"
+             class="post-image clickable"
+             loading="lazy"
+             (error)="onImageError($event)">
+        <div *ngIf="getMediaType(post.mediaUrls[0]) === 'video'" class="video-thumbnail-wrapper">
+          <video [src]="getMediaUrl(post.mediaUrls[0])"
+                 class="post-video clickable"
+                 preload="metadata"
+                 (error)="onVideoError($event)"></video>
+          <div class="play-overlay"><mat-icon>play_circle</mat-icon></div>
+        </div>
+        <div class="zoom-hint"><mat-icon>zoom_in</mat-icon></div>
+      </div>
+      <div class="media-item-wrapper" (click)="openLightbox(1)">
+        <img *ngIf="getMediaType(post.mediaUrls[1]) === 'image'"
+             [src]="getMediaUrl(post.mediaUrls[1])"
+             alt="Post image 2"
+             class="post-image clickable"
+             loading="lazy"
+             (error)="onImageError($event)">
+        <div *ngIf="getMediaType(post.mediaUrls[1]) === 'video'" class="video-thumbnail-wrapper">
+          <video [src]="getMediaUrl(post.mediaUrls[1])"
+                 class="post-video clickable"
+                 preload="metadata"
+                 (error)="onVideoError($event)"></video>
+          <div class="play-overlay"><mat-icon>play_circle</mat-icon></div>
+        </div>
+        <div class="zoom-hint"><mat-icon>zoom_in</mat-icon></div>
+      </div>
     </div>
 
     <!-- Three or Four Media Items -->
     <div class="media-container multi-images" *ngIf="post.mediaUrls.length >= 3">
-      <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'"
-           [src]="post.mediaUrls[0]"
-           alt="Post image 1"
-           class="post-image large"
-           loading="lazy"
-           (error)="onImageError($event)">
-      <video *ngIf="getMediaType(post.mediaUrls[0]) === 'video'"
-             [src]="post.mediaUrls[0]"
-             controls
-             class="post-video large"
-             preload="metadata"
-             (error)="onVideoError($event)"></video>
-      <div class="image-grid">
-        <img *ngIf="getMediaType(post.mediaUrls[1]) === 'image'"
-             [src]="post.mediaUrls[1]"
-             alt="Post image 2"
-             class="post-image"
+      <div class="media-item-wrapper large" (click)="openLightbox(0)">
+        <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'"
+             [src]="getMediaUrl(post.mediaUrls[0])"
+             alt="Post image 1"
+             class="post-image large clickable"
              loading="lazy"
              (error)="onImageError($event)">
-        <video *ngIf="getMediaType(post.mediaUrls[1]) === 'video'"
-               [src]="post.mediaUrls[1]"
-               controls
-               class="post-video"
-               preload="metadata"
-               (error)="onVideoError($event)"></video>
-        <img *ngIf="getMediaType(post.mediaUrls[2]) === 'image'"
-             [src]="post.mediaUrls[2]"
-             alt="Post image 3"
-             class="post-image"
-             loading="lazy"
-             (error)="onImageError($event)">
-        <video *ngIf="getMediaType(post.mediaUrls[2]) === 'video'"
-               [src]="post.mediaUrls[2]"
-               controls
-               class="post-video"
-               preload="metadata"
-               (error)="onVideoError($event)"></video>
-        <ng-container *ngIf="post.mediaUrls.length === 4">
-          <img *ngIf="getMediaType(post.mediaUrls[3]) === 'image'"
-               [src]="post.mediaUrls[3]"
-               alt="Post image 4"
-               class="post-image"
-               loading="lazy"
-               (error)="onImageError($event)">
-          <video *ngIf="getMediaType(post.mediaUrls[3]) === 'video'"
-                 [src]="post.mediaUrls[3]"
-                 controls
-                 class="post-video"
+        <div *ngIf="getMediaType(post.mediaUrls[0]) === 'video'" class="video-thumbnail-wrapper">
+          <video [src]="getMediaUrl(post.mediaUrls[0])"
+                 class="post-video large clickable"
                  preload="metadata"
                  (error)="onVideoError($event)"></video>
+          <div class="play-overlay"><mat-icon>play_circle</mat-icon></div>
+        </div>
+        <div class="zoom-hint"><mat-icon>zoom_in</mat-icon></div>
+      </div>
+      <div class="image-grid">
+        <div class="media-item-wrapper" (click)="openLightbox(1)">
+          <img *ngIf="getMediaType(post.mediaUrls[1]) === 'image'"
+               [src]="getMediaUrl(post.mediaUrls[1])"
+               alt="Post image 2"
+               class="post-image clickable"
+               loading="lazy"
+               (error)="onImageError($event)">
+          <div *ngIf="getMediaType(post.mediaUrls[1]) === 'video'" class="video-thumbnail-wrapper">
+            <video [src]="getMediaUrl(post.mediaUrls[1])"
+                   class="post-video clickable"
+                   preload="metadata"
+                   (error)="onVideoError($event)"></video>
+            <div class="play-overlay small"><mat-icon>play_circle</mat-icon></div>
+          </div>
+          <div class="zoom-hint small"><mat-icon>zoom_in</mat-icon></div>
+        </div>
+        <div class="media-item-wrapper" (click)="openLightbox(2)">
+          <img *ngIf="getMediaType(post.mediaUrls[2]) === 'image'"
+               [src]="getMediaUrl(post.mediaUrls[2])"
+               alt="Post image 3"
+               class="post-image clickable"
+               loading="lazy"
+               (error)="onImageError($event)">
+          <div *ngIf="getMediaType(post.mediaUrls[2]) === 'video'" class="video-thumbnail-wrapper">
+            <video [src]="getMediaUrl(post.mediaUrls[2])"
+                   class="post-video clickable"
+                   preload="metadata"
+                   (error)="onVideoError($event)"></video>
+            <div class="play-overlay small"><mat-icon>play_circle</mat-icon></div>
+          </div>
+          <div class="zoom-hint small"><mat-icon>zoom_in</mat-icon></div>
+        </div>
+        <ng-container *ngIf="post.mediaUrls.length === 4">
+          <div class="media-item-wrapper" (click)="openLightbox(3)">
+            <img *ngIf="getMediaType(post.mediaUrls[3]) === 'image'"
+                 [src]="getMediaUrl(post.mediaUrls[3])"
+                 alt="Post image 4"
+                 class="post-image clickable"
+                 loading="lazy"
+                 (error)="onImageError($event)">
+            <div *ngIf="getMediaType(post.mediaUrls[3]) === 'video'" class="video-thumbnail-wrapper">
+              <video [src]="getMediaUrl(post.mediaUrls[3])"
+                     class="post-video clickable"
+                     preload="metadata"
+                     (error)="onVideoError($event)"></video>
+              <div class="play-overlay small"><mat-icon>play_circle</mat-icon></div>
+            </div>
+            <div class="zoom-hint small"><mat-icon>zoom_in</mat-icon></div>
+          </div>
         </ng-container>
         <div class="image-placeholder" *ngIf="post.mediaUrls.length === 3"></div>
       </div>
     </div>
+  </div>
+
+  <!-- Lightbox Overlay -->
+  <div class="lightbox-overlay" *ngIf="lightboxOpen" (click)="onLightboxBackdropClick($event)">
+    <button class="lightbox-close" (click)="closeLightbox()">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <button class="lightbox-nav prev" *ngIf="lightboxIndex > 0" (click)="prevMedia($event)">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+
+    <div class="lightbox-content" (click)="$event.stopPropagation()">
+      <img *ngIf="lightboxType === 'image'" [src]="lightboxUrl" alt="Full size image">
+      <video *ngIf="lightboxType === 'video'" [src]="lightboxUrl" controls autoplay></video>
+      <div class="lightbox-counter" *ngIf="post.mediaUrls && post.mediaUrls.length > 1">
+        {{ lightboxIndex + 1 }} / {{ post.mediaUrls.length }}
+      </div>
+    </div>
+
+    <button class="lightbox-nav next" *ngIf="post.mediaUrls && lightboxIndex < post.mediaUrls.length - 1" (click)="nextMedia($event)">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
   </div>
 
   <div class="post-content">

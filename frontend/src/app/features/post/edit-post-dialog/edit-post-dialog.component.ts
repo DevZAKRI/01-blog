@@ -38,6 +38,13 @@ export class EditPostDialogComponent implements OnInit {
   mediaTypes: string[] = []; // Track 'image' or 'video' for selected files
   uploadedMediaTypes: string[] = []; // Track 'image' or 'video' for uploaded files
 
+  // Lightbox preview state
+  previewOpen = false;
+  previewUrl = '';
+  previewType: 'image' | 'video' = 'image';
+  previewIndex = 0;
+  previewIsUploaded = false;
+
   constructor(
     private fb: FormBuilder,
     private postService: PostService,
@@ -172,6 +179,30 @@ export class EditPostDialogComponent implements OnInit {
 
   canAddMore(): boolean {
     return this.getTotalMediaCount() < 4;
+  }
+
+  getMediaUrl(url: string): string {
+    return this.uploadService.getFullUrl(url);
+  }
+
+  // Lightbox methods
+  openPreview(url: string, type: 'image' | 'video', index: number, isUploaded: boolean): void {
+    this.previewUrl = url;
+    this.previewType = type;
+    this.previewIndex = index;
+    this.previewIsUploaded = isUploaded;
+    this.previewOpen = true;
+  }
+
+  closePreview(): void {
+    this.previewOpen = false;
+    this.previewUrl = '';
+  }
+
+  onPreviewBackdropClick(event: MouseEvent): void {
+    if ((event.target as HTMLElement).classList.contains('lightbox-backdrop')) {
+      this.closePreview();
+    }
   }
 
   onCancel(): void {

@@ -14,7 +14,7 @@
       </mat-error>
     </mat-form-field>
 
-    <!-- Quill Editor for Description -->
+    <!-- Description Textarea -->
     <div class="editor-label">
       <label>Post Description</label>
     </div>
@@ -29,52 +29,79 @@
 
     <!-- Media Upload Section -->
     <div class="media-upload-section">
-      <label for="media-input" class="media-label" [class.disabled]="!canAddMore()">
+      <label for="media-input" class="media-label" [class.disabled]="!canAddMore() || isUploading">
         <mat-icon>add_photo_alternate</mat-icon>
         <span>Add Images/Videos (Max 4)</span>
       </label>
       <input #fileInput
              type="file"
              id="media-input"
-             accept="image/*,video/*"
+             accept="image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm,video/quicktime"
              multiple
-             [disabled]="!canAddMore()"
+             [disabled]="!canAddMore() || isUploading"
              (change)="onMediaFileSelected($event)"
              hidden>
-      <small class="media-hint">{{ getTotalMediaCount() }} / 4 media files</small>
+      <small class="media-hint">
+        {{ getTotalMediaCount() }} / 4 media files
+        <span *ngIf="getPendingCount() > 0"> ({{ getPendingCount() }} pending upload)</span>
+      </small>
     </div>
 
-    <!-- Uploaded Media Preview -->
-    <div class="media-gallery" *ngIf="uploadedMediaUrls.length > 0">
-      <h4>Uploaded Media</h4>
+    <!-- Upload Progress -->
+    <div class="upload-progress" *ngIf="isUploading">
+      <mat-progress-bar mode="determinate" [value]="overallProgress"></mat-progress-bar>
+      <small>Uploading... {{ overallProgress }}%</small>
+    </div>
+
+    <!-- Media Gallery -->
+    <div class="media-gallery" *ngIf="mediaItems.length > 0">
+      <h4>Media ({{ getUploadedCount() }} uploaded, {{ getPendingCount() }} pending)</h4>
       <div class="preview-grid">
-        <div class="preview-item" *ngFor="let url of uploadedMediaUrls; let i = index">
-          <img *ngIf="uploadedMediaTypes[i] === 'image'" [src]="url" alt="Uploaded" class="preview-image">
-          <video *ngIf="uploadedMediaTypes[i] === 'video'" [src]="url" controls class="preview-video"></video>
-          <button mat-icon-button type="button" (click)="removeMedia(i, true)" class="remove-btn">
+        <div class="preview-item" *ngFor="let item of mediaItems; let i = index"
+             [class.uploaded]="item.isUploaded" [class.pending]="!item.isUploaded">
+          <!-- Image preview (clickable) -->
+          <img *ngIf="item.type === 'image'"
+               [src]="item.isUploaded ? item.url : item.preview"
+               alt="Media"
+               class="preview-image clickable"
+               (click)="openPreview(i)"
+               title="Click to enlarge">
+          <!-- Video preview (clickable) -->
+          <div *ngIf="item.type === 'video'" class="video-preview-wrapper" (click)="openPreview(i)" title="Click to enlarge">
+            <video [src]="item.isUploaded ? item.url : item.preview"
+                   class="preview-video"
+                   muted></video>
+            <div class="play-overlay">
+              <mat-icon>play_circle</mat-icon>
+            </div>
+          </div>
+
+          <!-- Enlarge hint -->
+          <div class="enlarge-hint">
+            <mat-icon>zoom_in</mat-icon>
+          </div>
+
+          <!-- Upload status indicator -->
+          <div class="status-indicator" *ngIf="!item.isUploaded">
+            <mat-icon>cloud_upload</mat-icon>
+          </div>
+          <div class="status-indicator uploaded" *ngIf="item.isUploaded">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+
+          <!-- Remove button -->
+          <button mat-icon-button type="button" (click)="removeMedia(i); $event.stopPropagation()" class="remove-btn" [disabled]="isUploading">
             <mat-icon>close</mat-icon>
           </button>
         </div>
       </div>
-    </div>
-
-    <!-- Selected Files Preview -->
-    <div class="media-gallery" *ngIf="mediaPreviews.length > 0">
-      <h4>Selected Media (Not Yet Uploaded)</h4>
-      <div class="preview-grid">
-        <div class="preview-item" *ngFor="let preview of mediaPreviews; let i = index">
-          <img *ngIf="mediaTypes[i] === 'image'" [src]="preview" alt="Preview" class="preview-image">
-          <video *ngIf="mediaTypes[i] === 'video'" [src]="preview" controls class="preview-video"></video>
-          <button mat-icon-button type="button" (click)="removeMedia(i, false)" class="remove-btn">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-      </div>
-      <small class="upload-hint">Media will be uploaded when you create the post</small>
+      <small class="upload-hint" *ngIf="getPendingCount() > 0">
+        Click on media to preview full size. Media will be uploaded when you create the post.
+      </small>
     </div>
 
     <!-- Clear All Button -->
-    <button mat-button type="button" (click)="clearAllMedia()" *ngIf="getTotalMediaCount() > 0" class="clear-all-btn">
+    <button mat-button type="button" (click)="clearAllMedia()" *ngIf="getTotalMediaCount() > 0" class="clear-all-btn" [disabled]="isUploading">
       <mat-icon>clear_all</mat-icon>
       Clear All Media
     </button>
@@ -87,6 +114,53 @@
           [disabled]="isLoading || isUploading || postForm.invalid">
     <mat-spinner diameter="20" *ngIf="isLoading || isUploading"></mat-spinner>
     <span *ngIf="!isLoading && !isUploading">Create Post</span>
-    <span *ngIf="isUploading">Uploading Images...</span>
+    <span *ngIf="isUploading">Uploading Media...</span>
+    <span *ngIf="isLoading && !isUploading">Creating Post...</span>
   </button>
 </mat-dialog-actions>
+
+<!-- Lightbox Preview Overlay -->
+<div class="lightbox-backdrop" *ngIf="previewOpen && previewItem" (click)="onPreviewBackdropClick($event)">
+  <div class="lightbox-container">
+    <!-- Close button -->
+    <button mat-icon-button class="lightbox-close" (click)="closePreview()">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <!-- Navigation arrows -->
+    <button mat-icon-button class="lightbox-nav prev"
+            *ngIf="previewIndex > 0"
+            (click)="prevPreview(); $event.stopPropagation()">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <button mat-icon-button class="lightbox-nav next"
+            *ngIf="previewIndex < mediaItems.length - 1"
+            (click)="nextPreview(); $event.stopPropagation()">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+
+    <!-- Content -->
+    <div class="lightbox-content" (click)="$event.stopPropagation()">
+      <!-- Image -->
+      <img *ngIf="previewItem.type === 'image'"
+           [src]="previewItem.isUploaded ? previewItem.url : previewItem.preview"
+           alt="Preview"
+           class="lightbox-image">
+
+      <!-- Video -->
+      <video *ngIf="previewItem.type === 'video'"
+             [src]="previewItem.isUploaded ? previewItem.url : previewItem.preview"
+             controls
+             autoplay
+             class="lightbox-video"></video>
+    </div>
+
+    <!-- Info bar -->
+    <div class="lightbox-info">
+      <span>{{ previewIndex + 1 }} / {{ mediaItems.length }}</span>
+      <span class="status-badge" [class.uploaded]="previewItem.isUploaded" [class.pending]="!previewItem.isUploaded">
+        {{ previewItem.isUploaded ? 'Uploaded' : 'Pending Upload' }}
+      </span>
+    </div>
+  </div>
+</div>

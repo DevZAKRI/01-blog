@@ -49,9 +49,19 @@
       <h4>Current Media</h4>
       <div class="preview-grid">
         <div class="preview-item" *ngFor="let url of uploadedMediaUrls; let i = index">
-          <img *ngIf="uploadedMediaTypes[i] === 'image'" [src]="url" alt="Uploaded" class="preview-image">
-          <video *ngIf="uploadedMediaTypes[i] === 'video'" [src]="url" controls class="preview-video"></video>
-          <button mat-icon-button type="button" (click)="removeMedia(i, true)" class="remove-btn">
+          <img *ngIf="uploadedMediaTypes[i] === 'image'"
+               [src]="getMediaUrl(url)"
+               alt="Uploaded"
+               class="preview-image clickable"
+               (click)="openPreview(getMediaUrl(url), 'image', i, true)"
+               title="Click to enlarge">
+          <div *ngIf="uploadedMediaTypes[i] === 'video'" class="video-preview-wrapper"
+               (click)="openPreview(getMediaUrl(url), 'video', i, true)" title="Click to enlarge">
+            <video [src]="getMediaUrl(url)" class="preview-video" muted></video>
+            <div class="play-overlay"><mat-icon>play_circle</mat-icon></div>
+          </div>
+          <div class="enlarge-hint"><mat-icon>zoom_in</mat-icon></div>
+          <button mat-icon-button type="button" (click)="removeMedia(i, true); $event.stopPropagation()" class="remove-btn">
             <mat-icon>close</mat-icon>
           </button>
         </div>
@@ -62,15 +72,25 @@
     <div class="media-gallery" *ngIf="mediaPreviews.length > 0">
       <h4>New Media (Not Yet Uploaded)</h4>
       <div class="preview-grid">
-        <div class="preview-item" *ngFor="let preview of mediaPreviews; let i = index">
-          <img *ngIf="mediaTypes[i] === 'image'" [src]="preview" alt="Preview" class="preview-image">
-          <video *ngIf="mediaTypes[i] === 'video'" [src]="preview" controls class="preview-video"></video>
-          <button mat-icon-button type="button" (click)="removeMedia(i, false)" class="remove-btn">
+        <div class="preview-item pending" *ngFor="let preview of mediaPreviews; let i = index">
+          <img *ngIf="mediaTypes[i] === 'image'"
+               [src]="preview"
+               alt="Preview"
+               class="preview-image clickable"
+               (click)="openPreview(preview, 'image', i, false)"
+               title="Click to enlarge">
+          <div *ngIf="mediaTypes[i] === 'video'" class="video-preview-wrapper"
+               (click)="openPreview(preview, 'video', i, false)" title="Click to enlarge">
+            <video [src]="preview" class="preview-video" muted></video>
+            <div class="play-overlay"><mat-icon>play_circle</mat-icon></div>
+          </div>
+          <div class="enlarge-hint"><mat-icon>zoom_in</mat-icon></div>
+          <button mat-icon-button type="button" (click)="removeMedia(i, false); $event.stopPropagation()" class="remove-btn">
             <mat-icon>close</mat-icon>
           </button>
         </div>
       </div>
-      <small class="upload-hint">New media will be uploaded when you save the post</small>
+      <small class="upload-hint">Click on media to preview. New media will be uploaded when you save.</small>
     </div>
 
     <!-- Clear All Button -->
@@ -91,3 +111,36 @@
     <span *ngIf="isLoading && !isUploading">Saving...</span>
   </button>
 </mat-dialog-actions>
+
+<!-- Lightbox Preview Overlay -->
+<div class="lightbox-backdrop" *ngIf="previewOpen && previewUrl" (click)="onPreviewBackdropClick($event)">
+  <div class="lightbox-container">
+    <!-- Close button -->
+    <button mat-icon-button class="lightbox-close" (click)="closePreview()">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <!-- Content -->
+    <div class="lightbox-content" (click)="$event.stopPropagation()">
+      <!-- Image -->
+      <img *ngIf="previewType === 'image'"
+           [src]="previewUrl"
+           alt="Preview"
+           class="lightbox-image">
+
+      <!-- Video -->
+      <video *ngIf="previewType === 'video'"
+             [src]="previewUrl"
+             controls
+             autoplay
+             class="lightbox-video"></video>
+    </div>
+
+    <!-- Info bar -->
+    <div class="lightbox-info">
+      <span class="status-badge" [class.uploaded]="previewIsUploaded" [class.pending]="!previewIsUploaded">
+        {{ previewIsUploaded ? 'Uploaded' : 'Pending Upload' }}
+      </span>
+    </div>
+  </div>
+</div>

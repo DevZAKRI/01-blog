@@ -9,6 +9,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { PostService } from '../../../core/services/post.service';
+import { UploadService } from '../../../core/services/upload.service';
 import { Post } from '../../../core/models/post.model';
 import { AvatarPipe } from '../../../core/pipes/avatar.pipe';
 import { CommentDialogComponent } from '../comment-dialog/comment-dialog.component';
@@ -38,10 +39,17 @@ export class PostDetailComponent implements OnInit {
   isLoading = true;
   isOwner = false;
 
+  // Lightbox state
+  lightboxOpen = false;
+  lightboxUrl = '';
+  lightboxType: 'image' | 'video' = 'image';
+  lightboxIndex = 0;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private postService: PostService,
+    private uploadService: UploadService,
     private authService: AuthService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
@@ -156,9 +164,11 @@ export class PostDetailComponent implements OnInit {
   }
 
   getMediaType(url: string): 'image' | 'video' {
-    if (!url) return 'image';
-    const ext = url.split('.').pop()?.toLowerCase();
-    return (ext === 'mp4' || ext === 'webm' || ext === 'ogg' || ext === 'mov') ? 'video' : 'image';
+    return this.uploadService.getMediaTypeFromUrl(url);
+  }
+
+  getMediaUrl(url: string): string {
+    return this.uploadService.getFullUrl(url);
   }
 
   onImageError(event: Event): void {
@@ -181,5 +191,46 @@ export class PostDetailComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/']);
+  }
+
+  // Lightbox methods
+  openLightbox(index: number): void {
+    if (!this.post?.mediaUrls || index >= this.post.mediaUrls.length) return;
+    const url = this.post.mediaUrls[index];
+    this.lightboxUrl = this.getMediaUrl(url);
+    this.lightboxType = this.getMediaType(url);
+    this.lightboxIndex = index;
+    this.lightboxOpen = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeLightbox(): void {
+    this.lightboxOpen = false;
+    this.lightboxUrl = '';
+    document.body.style.overflow = '';
+  }
+
+  prevMedia(event: Event): void {
+    event.stopPropagation();
+    if (!this.post?.mediaUrls) return;
+    const newIndex = this.lightboxIndex - 1;
+    if (newIndex >= 0) {
+      this.openLightbox(newIndex);
+    }
+  }
+
+  nextMedia(event: Event): void {
+    event.stopPropagation();
+    if (!this.post?.mediaUrls) return;
+    const newIndex = this.lightboxIndex + 1;
+    if (newIndex < this.post.mediaUrls.length) {
+      this.openLightbox(newIndex);
+    }
+  }
+
+  onLightboxBackdropClick(event: MouseEvent): void {
+    if ((event.target as HTMLElement).classList.contains('lightbox-overlay')) {
+      this.closeLightbox();
+    }
   }
 }
