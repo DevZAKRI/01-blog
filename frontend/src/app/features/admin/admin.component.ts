@@ -308,8 +308,8 @@ export class AdminComponent implements OnInit {
       if (avatar.startsWith('http')) {
         return avatar;
       }
-      // Relative path - prepend base URL
-      return `http://localhost:8080${avatar.startsWith('/') ? '' : '/'}${avatar}`;
+      // Relative path - works with nginx proxy in production
+      return avatar.startsWith('/') ? avatar : `/${avatar}`;
     }
     return `https://robohash.org/${user.username || user.id}?set=set4`;
   }
@@ -320,7 +320,7 @@ export class AdminComponent implements OnInit {
       if (avatar.startsWith('http')) {
         return avatar;
       }
-      return `http://localhost:8080${avatar.startsWith('/') ? '' : '/'}${avatar}`;
+      return avatar.startsWith('/') ? avatar : `/${avatar}`;
     }
     return `https://robohash.org/${(post as any).authorUsername || 'user'}?set=set4`;
   }
