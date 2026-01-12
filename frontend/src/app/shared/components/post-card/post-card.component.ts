@@ -11,6 +11,8 @@ import { AuthService } from '../../../core/services/auth.service';
 import { PostService } from '../../../core/services/post.service';
 import { UploadService } from '../../../core/services/upload.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ReportPostDialogComponent } from '../report-post-dialog/report-post-dialog.component';
 
 @Component({
   selector: 'app-post-card',
@@ -22,7 +24,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatIconModule,
     AvatarPipe,
     MatMenuModule,
-    RouterModule
+    RouterModule,
+    MatDialogModule
   ],
   templateUrl: './post-card.component.html',
   styleUrls: ['./post-card.component.css']
@@ -34,6 +37,7 @@ export class PostCardComponent {
   @Output() comment = new EventEmitter<string>();
   @Output() edit = new EventEmitter<Post>();
   @Output() delete = new EventEmitter<string>();
+  @Output() report = new EventEmitter<string>();
 
   isLikingInProgress = false;
 
@@ -47,7 +51,8 @@ export class PostCardComponent {
     public authService: AuthService,
     private postService: PostService,
     private uploadService: UploadService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {}
 
   get isOwner(): boolean {
@@ -55,8 +60,18 @@ export class PostCardComponent {
     return currentUser?.id === this.post.authorId;
   }
 
+  isAuthorAdmin(): boolean {
+    return this.post.author?.role === 'ADMIN';
+  }
+
   onLike(): void {
     if (this.isLikingInProgress) return;
+
+    // Don't allow liking hidden posts
+    if (this.post.hidden) {
+      this.snackBar.open('Cannot interact with hidden posts', 'Close', { duration: 2000 });
+      return;
+    }
 
     this.isLikingInProgress = true;
     const wasLiked = this.post.isLiked;
@@ -75,6 +90,11 @@ export class PostCardComponent {
   }
 
   onComment(): void {
+    // Don't allow commenting on hidden posts
+    if (this.post.hidden) {
+      this.snackBar.open('Cannot interact with hidden posts', 'Close', { duration: 2000 });
+      return;
+    }
     this.comment.emit(this.post.id);
   }
 
@@ -84,6 +104,19 @@ export class PostCardComponent {
 
   onDelete(): void {
     this.delete.emit(this.post.id);
+  }
+
+  onReport(): void {
+    const dialogRef = this.dialog.open(ReportPostDialogComponent, {
+      width: '450px',
+      data: { postId: this.post.id, postTitle: this.post.title }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.report.emit(this.post.id);
+      }
+    });
   }
 
   getTimeSince(dateString: string): string {

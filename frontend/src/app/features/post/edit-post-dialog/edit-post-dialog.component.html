@@ -12,6 +12,9 @@
       <mat-error *ngIf="postForm.get('title')?.hasError('required')">
         Title is required
       </mat-error>
+      <mat-error *ngIf="postForm.get('title')?.hasError('maxlength')">
+        Title cannot exceed 200 characters
+      </mat-error>
     </mat-form-field>
 
     <!-- Quill Editor for Description -->
@@ -23,8 +26,12 @@
       placeholder="Write your post description here..."
       rows="4"
       class="description-textarea"></textarea>
+    <div class="description-hint">{{ postForm.get('description')?.value?.length || 0 }} / 5000</div>
     <mat-error *ngIf="postForm.get('description')?.hasError('required')" class="error-text">
       Description is required
+    </mat-error>
+    <mat-error *ngIf="postForm.get('description')?.hasError('maxlength')" class="error-text">
+      Description cannot exceed 5000 characters
     </mat-error>
 
     <!-- Media Upload Section -->

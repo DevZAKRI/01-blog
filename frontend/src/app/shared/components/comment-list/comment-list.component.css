@@ -53,6 +53,11 @@ mat-list {
   font-size: 13px;
   color: #1a1a1a;
   text-decoration: none;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
 }
 
 .comment-author:hover {

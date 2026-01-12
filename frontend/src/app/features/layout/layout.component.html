@@ -87,5 +87,31 @@
     <div class="content">
       <router-outlet></router-outlet>
     </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+        <mat-icon>home</mat-icon>
+        <span>Home</span>
+      </a>
+      <a routerLink="/explore" routerLinkActive="active" class="nav-item">
+        <mat-icon>explore</mat-icon>
+        <span>Explore</span>
+      </a>
+      <button class="nav-item create-btn" (click)="onCreatePost()">
+        <mat-icon>add_circle</mat-icon>
+        <span>Post</span>
+      </button>
+      <a routerLink="/notifications" routerLinkActive="active" class="nav-item">
+        <mat-icon [matBadge]="(unreadCount$ | async) || 0"
+                  [matBadgeHidden]="!(unreadCount$ | async)"
+                  matBadgeSize="small">notifications</mat-icon>
+        <span>Alerts</span>
+      </a>
+      <a *ngIf="currentUser$ | async as currentUser" [routerLink]="['/profile', currentUser?.id]" routerLinkActive="active" class="nav-item">
+        <mat-icon>person</mat-icon>
+        <span>Profile</span>
+      </a>
+    </nav>
   </mat-sidenav-content>
 </mat-sidenav-container>

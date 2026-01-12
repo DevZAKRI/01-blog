@@ -1,12 +1,15 @@
 package com.zerooneblog.blog.controller;
 
+import java.time.Instant;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.zerooneblog.blog.dto.response.PostDto;
 import com.zerooneblog.blog.dto.response.ReportDto;
 import com.zerooneblog.blog.dto.response.UserDto;
+import com.zerooneblog.blog.exception.BadRequestException;
 import com.zerooneblog.blog.exception.NotFoundException;
 import com.zerooneblog.blog.mapper.EntityMapper;
 import com.zerooneblog.blog.model.Post;
@@ -32,12 +36,13 @@ import com.zerooneblog.blog.repository.PostRepository;
 import com.zerooneblog.blog.repository.ReportRepository;
 import com.zerooneblog.blog.repository.SubscriptionRepository;
 import com.zerooneblog.blog.repository.UserRepository;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 @RestController
 @RequestMapping("/api/v1/admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
+
+    private static final Logger logger = Logger.getLogger(AdminController.class.getName());
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
@@ -86,14 +91,26 @@ public class AdminController {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
         
+        // Prevent banning admin users
+        if ("ADMIN".equals(user.getRole())) {
+            throw new BadRequestException("Cannot ban admin users");
+        }
+        
         // Prevent admin from banning themselves
         String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         if (user.getEmail().equalsIgnoreCase(currentEmail)) {
-            return ResponseEntity.badRequest().body(Map.of("error", "You cannot ban yourself"));
+            throw new BadRequestException("You cannot ban yourself");
         }
         
         user.setBanned(true);
+        // Increment token version to invalidate all existing tokens
+        user.setTokenVersion((user.getTokenVersion() != null ? user.getTokenVersion() : 0L) + 1);
         userRepository.save(user);
+        
+        // Audit log
+        logger.info("[AUDIT] User banned: id=" + user.getId() + ", username=" + user.getUsername() + 
+                   ", bannedBy=" + currentEmail + ", at=" + Instant.now());
+        
         return ResponseEntity.ok(Map.of("message", "User banned successfully", "banned", true));
     }
 
@@ -101,8 +118,16 @@ public class AdminController {
     public ResponseEntity<Map<String, Object>> unbanUser(@PathVariable Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
+        
+        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        
         user.setBanned(false);
         userRepository.save(user);
+        
+        // Audit log
+        logger.info("[AUDIT] User unbanned: id=" + user.getId() + ", username=" + user.getUsername() + 
+                   ", unbannedBy=" + currentEmail + ", at=" + Instant.now());
+        
         return ResponseEntity.ok(Map.of("message", "User unbanned successfully", "banned", false));
     }
 
@@ -113,14 +138,19 @@ public class AdminController {
         
         // Don't allow deleting admin users
         if ("ADMIN".equals(user.getRole())) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Cannot delete admin users"));
+            throw new BadRequestException("Cannot delete admin users");
         }
         
         // Prevent admin from deleting themselves
         String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         if (user.getEmail().equalsIgnoreCase(currentEmail)) {
-            return ResponseEntity.badRequest().body(Map.of("error", "You cannot delete yourself"));
+            throw new BadRequestException("You cannot delete yourself");
         }
+        
+        // Store user info for audit log before deletion
+        Long userId = user.getId();
+        String username = user.getUsername();
+        String userEmail = user.getEmail();
         
         // Delete all related data
         // 1. Delete notifications where user is receiver
@@ -140,15 +170,17 @@ public class AdminController {
         // 5. Delete comments on user's posts and by user
         commentRepository.deleteByUser(user);
         
-        // 6. Delete user's posts (this will cascade delete likes/comments on those posts)
+        // 6. Delete user's posts (cascade will handle likes/comments due to JPA cascade)
         for (Post post : postRepository.findByAuthor(user)) {
-            likeRepository.deleteByPost(post);
-            commentRepository.deleteByPost(post);
             postRepository.delete(post);
         }
         
         // 7. Finally delete the user
         userRepository.delete(user);
+        
+        // Audit log
+        logger.info("[AUDIT] User deleted: id=" + userId + ", username=" + username + 
+                   ", email=" + userEmail + ", deletedBy=" + currentEmail + ", at=" + Instant.now());
         
         return ResponseEntity.ok(Map.of("message", "User and all related data deleted successfully"));
     }
@@ -276,15 +308,28 @@ public class AdminController {
         
         User targetUser = report.getTargetUser();
         if (targetUser == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "No target user in this report"));
+            throw new BadRequestException("No target user in this report");
         }
         
+        // Prevent banning admin users
+        if ("ADMIN".equals(targetUser.getRole())) {
+            throw new BadRequestException("Cannot ban admin users");
+        }
+        
+        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        
         targetUser.setBanned(true);
+        // Increment token version to invalidate all existing tokens
+        targetUser.setTokenVersion((targetUser.getTokenVersion() != null ? targetUser.getTokenVersion() : 0L) + 1);
         userRepository.save(targetUser);
         
         // Mark report as resolved
         report.setStatus("RESOLVED");
         reportRepository.save(report);
+        
+        // Audit log
+        logger.info("[AUDIT] User banned via report: id=" + targetUser.getId() + ", username=" + targetUser.getUsername() + 
+                   ", reportId=" + report.getId() + ", bannedBy=" + currentEmail + ", at=" + Instant.now());
         
         return ResponseEntity.ok(Map.of(
             "message", "User banned and report resolved",

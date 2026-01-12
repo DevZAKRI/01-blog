@@ -45,6 +45,10 @@
   font-size: 32px;
   font-weight: 700;
   color: #1a1a1a;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .full-name {

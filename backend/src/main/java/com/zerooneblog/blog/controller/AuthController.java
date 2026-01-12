@@ -56,12 +56,13 @@ public class AuthController {
         user.setUsername(htmlSanitizer.sanitizePlainText(body.getUsername()));
         user.setPassword(passwordEncoder.encode(body.getPassword()));
         user.setEmail(body.getEmail());
+        user.setTokenVersion(0L);
         // Default role is USER (set in entity)
 
         userRepository.save(user);
 
-        // Generate token with email and role
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+        // Generate token with email, role, and token version
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getTokenVersion());
         return ResponseEntity.ok(new AuthResponse(token, com.zerooneblog.blog.mapper.EntityMapper.toDto(user)));
     }
 
@@ -92,8 +93,8 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
-        // Generate token with email and role
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+        // Generate token with email, role, and token version
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getTokenVersion());
         return ResponseEntity.ok(new AuthResponse(token, com.zerooneblog.blog.mapper.EntityMapper.toDto(user)));
     }
 }

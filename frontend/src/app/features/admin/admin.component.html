@@ -122,9 +122,13 @@
                     <mat-icon>swap_horiz</mat-icon>
                     <span>{{ user.role === 'ADMIN' ? 'Remove Admin' : 'Make Admin' }}</span>
                   </button>
-                  <button mat-menu-item (click)="user.banned ? unbanUser(user.id) : banUser(user.id)">
+                  <button mat-menu-item (click)="user.banned ? unbanUser(user.id) : banUser(user.id)" *ngIf="user.role !== 'ADMIN'">
                     <mat-icon>{{ user.banned ? 'lock_open' : 'block' }}</mat-icon>
                     <span>{{ user.banned ? 'Unban User' : 'Ban User' }}</span>
+                  </button>
+                  <button mat-menu-item disabled *ngIf="user.role === 'ADMIN'">
+                    <mat-icon>block</mat-icon>
+                    <span>Cannot ban admins</span>
                   </button>
                   <mat-divider></mat-divider>
                   <button mat-menu-item class="delete-action" (click)="deleteUser(user.id)" *ngIf="user.role !== 'ADMIN'">

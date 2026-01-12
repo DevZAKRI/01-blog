@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +11,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommentListComponent } from '../../../shared/components/comment-list/comment-list.component';
 import { CommentService } from '../../../core/services/comment.service';
 import { Comment } from '../../../core/models/comment.model';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-comment-dialog',
@@ -42,6 +43,7 @@ export class CommentDialogComponent implements OnInit {
     private fb: FormBuilder,
     private commentService: CommentService,
     private snackBar: MatSnackBar,
+    private dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public data: { postId: string },
     private dialogRef: MatDialogRef<CommentDialogComponent>
   ) {
@@ -94,18 +96,31 @@ export class CommentDialogComponent implements OnInit {
   }
 
   onDeleteComment(commentId: string): void {
-    if (confirm('Delete this comment?')) {
-      this.commentService.deleteComment(this.data.postId, commentId).subscribe({
-        next: () => {
-          this.comments = this.comments.filter(c => c.id !== commentId);
-          this.totalComments--;
-          this.snackBar.open('Comment deleted', 'Close', { duration: 2000 });
-        },
-        error: () => {
-          this.snackBar.open('Failed to delete comment', 'Close', { duration: 3000 });
-        }
-      });
-    }
+    const confirmRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Comment',
+        message: 'Are you sure you want to delete this comment?',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        type: 'danger'
+      }
+    });
+
+    confirmRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.commentService.deleteComment(this.data.postId, commentId).subscribe({
+          next: () => {
+            this.comments = this.comments.filter(c => c.id !== commentId);
+            this.totalComments--;
+            this.snackBar.open('Comment deleted', 'Close', { duration: 2000 });
+          },
+          error: () => {
+            this.snackBar.open('Failed to delete comment', 'Close', { duration: 3000 });
+          }
+        });
+      }
+    });
   }
 
   onClose(): void {

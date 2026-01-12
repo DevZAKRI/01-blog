@@ -31,6 +31,9 @@ public class Report {
     @ManyToOne(fetch = FetchType.LAZY)
     private User targetUser;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Post targetPost;
+
     @Column(columnDefinition = "TEXT")
     private String reason;
 

@@ -15,6 +15,7 @@ import { AvatarPipe } from '../../../core/pipes/avatar.pipe';
 import { CommentDialogComponent } from '../comment-dialog/comment-dialog.component';
 import { EditPostDialogComponent } from '../edit-post-dialog/edit-post-dialog.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-post-detail',
@@ -124,17 +125,31 @@ export class PostDetailComponent implements OnInit {
 
   onDelete(): void {
     if (!this.post) return;
-    if (confirm('Are you sure you want to delete this post?')) {
-      this.postService.deletePost(this.post.id).subscribe({
-        next: () => {
-          this.snackBar.open('Post deleted successfully', 'Close', { duration: 3000 });
-          this.router.navigate(['/']);
-        },
-        error: () => {
-          this.snackBar.open('Failed to delete post', 'Close', { duration: 3000 });
-        }
-      });
-    }
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Post',
+        message: 'Are you sure you want to delete this post? This action cannot be undone.',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        type: 'danger'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.postService.deletePost(this.post!.id).subscribe({
+          next: () => {
+            this.snackBar.open('Post deleted successfully', 'Close', { duration: 3000 });
+            this.router.navigate(['/']);
+          },
+          error: () => {
+            this.snackBar.open('Failed to delete post', 'Close', { duration: 3000 });
+          }
+        });
+      }
+    });
   }
 
   getTimeSince(dateString: string): string {

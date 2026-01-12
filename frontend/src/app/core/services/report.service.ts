@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Report, CreateReportRequest } from '../models/report.model';
+import { Report, CreateReportRequest, CreatePostReportRequest } from '../models/report.model';
 
 @Injectable({
   providedIn: 'root'
@@ -15,5 +15,12 @@ export class ReportService {
    */
   createReport(data: CreateReportRequest): Observable<Report> {
     return this.http.post<Report>(`${environment.apiUrl}/users/${data.reportedUserId}/report`, { reason: data.reason });
+  }
+
+  /**
+   * Create a report against a post
+   */
+  reportPost(data: CreatePostReportRequest): Observable<Report> {
+    return this.http.post<Report>(`${environment.apiUrl}/posts/${data.postId}/report`, { reason: data.reason });
   }
 }

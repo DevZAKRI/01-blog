@@ -10,6 +10,7 @@ import { PostService } from '../../core/services/post.service';
 import { Post } from '../../core/models/post.model';
 import { CommentDialogComponent } from '../post/comment-dialog/comment-dialog.component';
 import { EditPostDialogComponent } from '../post/edit-post-dialog/edit-post-dialog.component';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-feed',
@@ -93,17 +94,30 @@ export class FeedComponent implements OnInit {
   }
 
   onDelete(postId: string): void {
-    if (confirm('Are you sure you want to delete this post?')) {
-      this.postService.deletePost(postId).subscribe({
-        next: () => {
-          this.posts = this.posts.filter(p => p.id !== postId);
-          this.snackBar.open('Post deleted successfully', 'Close', { duration: 3000 });
-        },
-        error: () => {
-          this.snackBar.open('Failed to delete post', 'Close', { duration: 3000 });
-        }
-      });
-    }
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Post',
+        message: 'Are you sure you want to delete this post? This action cannot be undone.',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        type: 'danger'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.postService.deletePost(postId).subscribe({
+          next: () => {
+            this.posts = this.posts.filter(p => p.id !== postId);
+            this.snackBar.open('Post deleted successfully', 'Close', { duration: 3000 });
+          },
+          error: () => {
+            this.snackBar.open('Failed to delete post', 'Close', { duration: 3000 });
+          }
+        });
+      }
+    });
   }
 
   onEdit(post: Post): void {

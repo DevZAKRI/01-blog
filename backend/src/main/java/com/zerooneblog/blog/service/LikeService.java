@@ -2,6 +2,7 @@ package com.zerooneblog.blog.service;
 
 import org.springframework.stereotype.Service;
 
+import com.zerooneblog.blog.exception.BadRequestException;
 import com.zerooneblog.blog.exception.NotFoundException;
 import com.zerooneblog.blog.model.Post;
 import com.zerooneblog.blog.model.PostLike;
@@ -21,6 +22,12 @@ public class LikeService {
 
     public boolean toggleLike(Long postId, User user) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
+        
+        // Reject likes on hidden posts (unless user is admin)
+        if (post.isHidden() && !"ADMIN".equals(user.getRole())) {
+            throw new BadRequestException("Cannot interact with hidden posts");
+        }
+        
         var existing = likeRepository.findByUserAndPost(user, post);
         if (existing.isPresent()) {
             likeRepository.delete(existing.get());
@@ -35,6 +42,12 @@ public class LikeService {
 
     public void unlike(Long postId, User user) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
+        
+        // Reject unlikes on hidden posts (unless user is admin)
+        if (post.isHidden() && !"ADMIN".equals(user.getRole())) {
+            throw new BadRequestException("Cannot interact with hidden posts");
+        }
+        
         likeRepository.findByUserAndPost(user, post).ifPresent(likeRepository::delete);
     }
 

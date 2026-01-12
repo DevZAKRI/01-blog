@@ -11,7 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
 import { Router } from '@angular/router';
@@ -20,6 +20,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models/user.model';
 import { Post } from '../../core/models/post.model';
 import { Report } from '../../core/models/report.model';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-admin',
@@ -74,7 +75,8 @@ export class AdminComponent implements OnInit {
     private adminService: AdminService,
     private authService: AuthService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {
     const currentUser = this.authService.getCurrentUser();
     this.currentUserId = currentUser?.id || null;
@@ -120,57 +122,85 @@ export class AdminComponent implements OnInit {
   }
 
   banUser(userId: string): void {
-    if (!confirm('Are you sure you want to ban this user? They will not be able to log in.')) return;
+    this.openConfirmDialog({
+      title: 'Ban User',
+      message: 'Are you sure you want to ban this user? They will not be able to log in.',
+      confirmText: 'Ban User',
+      type: 'warning'
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
 
-    this.adminService.banUser(userId).subscribe({
-      next: () => {
-        const user = this.users.find(u => u.id === userId);
-        if (user) user.banned = true;
-        this.showMessage('User banned successfully');
-        this.loadStats();
-      },
-      error: () => this.showMessage('Failed to ban user', true)
+      this.adminService.banUser(userId).subscribe({
+        next: () => {
+          const user = this.users.find(u => u.id === userId);
+          if (user) user.banned = true;
+          this.showMessage('User banned successfully');
+          this.loadStats();
+        },
+        error: () => this.showMessage('Failed to ban user', true)
+      });
     });
   }
 
   unbanUser(userId: string): void {
-    if (!confirm('Are you sure you want to unban this user?')) return;
+    this.openConfirmDialog({
+      title: 'Unban User',
+      message: 'Are you sure you want to unban this user?',
+      confirmText: 'Unban User',
+      type: 'info'
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
 
-    this.adminService.unbanUser(userId).subscribe({
-      next: () => {
-        const user = this.users.find(u => u.id === userId);
-        if (user) user.banned = false;
-        this.showMessage('User unbanned successfully');
-        this.loadStats();
-      },
-      error: () => this.showMessage('Failed to unban user', true)
+      this.adminService.unbanUser(userId).subscribe({
+        next: () => {
+          const user = this.users.find(u => u.id === userId);
+          if (user) user.banned = false;
+          this.showMessage('User unbanned successfully');
+          this.loadStats();
+        },
+        error: () => this.showMessage('Failed to unban user', true)
+      });
     });
   }
 
   deleteUser(userId: string): void {
-    if (!confirm('⚠️ WARNING: This will permanently delete the user and ALL their data (posts, comments, likes, etc.). This action cannot be undone. Continue?')) return;
+    this.openConfirmDialog({
+      title: 'Delete User Permanently',
+      message: '⚠️ WARNING: This will permanently delete the user and ALL their data (posts, comments, likes, etc.). This action cannot be undone.',
+      confirmText: 'Delete Forever',
+      type: 'danger'
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
 
-    this.adminService.deleteUser(userId).subscribe({
-      next: () => {
-        this.users = this.users.filter(u => u.id !== userId);
-        this.showMessage('User deleted successfully');
-        this.loadStats();
-        this.loadPosts(); // Refresh posts as some might have been deleted
-      },
-      error: (err) => this.showMessage(err.error?.error || 'Failed to delete user', true)
+      this.adminService.deleteUser(userId).subscribe({
+        next: () => {
+          this.users = this.users.filter(u => u.id !== userId);
+          this.showMessage('User deleted successfully');
+          this.loadStats();
+          this.loadPosts();
+        },
+        error: (err) => this.showMessage(err.error?.error || 'Failed to delete user', true)
+      });
     });
   }
 
   toggleUserRole(user: User): void {
     const newRole = user.role === 'ADMIN' ? 'USER' : 'ADMIN';
-    if (!confirm(`Change ${user.username}'s role to ${newRole}?`)) return;
+    this.openConfirmDialog({
+      title: 'Change User Role',
+      message: `Change ${user.username}'s role to ${newRole}?`,
+      confirmText: 'Change Role',
+      type: 'warning'
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
 
-    this.adminService.updateUserRole(user.id, newRole).subscribe({
-      next: () => {
-        user.role = newRole as any;
-        this.showMessage(`User role updated to ${newRole}`);
-      },
-      error: () => this.showMessage('Failed to update user role', true)
+      this.adminService.updateUserRole(user.id, newRole).subscribe({
+        next: () => {
+          user.role = newRole as any;
+          this.showMessage(`User role updated to ${newRole}`);
+        },
+        error: () => this.showMessage('Failed to update user role', true)
+      });
     });
   }
 
@@ -215,15 +245,22 @@ export class AdminComponent implements OnInit {
   }
 
   deletePost(postId: string): void {
-    if (!confirm('Are you sure you want to permanently delete this post?')) return;
+    this.openConfirmDialog({
+      title: 'Delete Post',
+      message: 'Are you sure you want to permanently delete this post?',
+      confirmText: 'Delete',
+      type: 'danger'
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
 
-    this.adminService.deletePost(postId).subscribe({
-      next: () => {
-        this.posts = this.posts.filter(p => p.id !== postId);
-        this.showMessage('Post deleted successfully');
-        this.loadStats();
-      },
-      error: () => this.showMessage('Failed to delete post', true)
+      this.adminService.deletePost(postId).subscribe({
+        next: () => {
+          this.posts = this.posts.filter(p => p.id !== postId);
+          this.showMessage('Post deleted successfully');
+          this.loadStats();
+        },
+        error: () => this.showMessage('Failed to delete post', true)
+      });
     });
   }
 
@@ -263,34 +300,55 @@ export class AdminComponent implements OnInit {
     const report = this.reports.find(r => r.id === reportId);
     if (!report?.reportedUser) return;
 
-    if (!confirm(`Ban user ${report.reportedUser.username} and resolve this report?`)) return;
+    this.openConfirmDialog({
+      title: 'Ban User & Resolve Report',
+      message: `Ban user ${report.reportedUser.username} and resolve this report?`,
+      confirmText: 'Ban & Resolve',
+      type: 'warning'
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
 
-    this.adminService.banReportedUser(reportId).subscribe({
-      next: () => {
-        report.status = 'RESOLVED' as any;
-        if (report.reportedUser) report.reportedUser.banned = true;
-        this.showMessage('User banned and report resolved');
-        this.loadStats();
-        this.loadUsers();
-      },
-      error: () => this.showMessage('Failed to ban user', true)
+      this.adminService.banReportedUser(reportId).subscribe({
+        next: () => {
+          report.status = 'RESOLVED' as any;
+          if (report.reportedUser) report.reportedUser.banned = true;
+          this.showMessage('User banned and report resolved');
+          this.loadStats();
+          this.loadUsers();
+        },
+        error: () => this.showMessage('Failed to ban user', true)
+      });
     });
   }
 
   deleteReport(reportId: string): void {
-    if (!confirm('Delete this report?')) return;
+    this.openConfirmDialog({
+      title: 'Delete Report',
+      message: 'Are you sure you want to delete this report?',
+      confirmText: 'Delete',
+      type: 'danger'
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
 
-    this.adminService.deleteReport(reportId).subscribe({
-      next: () => {
-        this.reports = this.reports.filter(r => r.id !== reportId);
-        this.showMessage('Report deleted');
-        this.loadStats();
-      },
-      error: () => this.showMessage('Failed to delete report', true)
+      this.adminService.deleteReport(reportId).subscribe({
+        next: () => {
+          this.reports = this.reports.filter(r => r.id !== reportId);
+          this.showMessage('Report deleted');
+          this.loadStats();
+        },
+        error: () => this.showMessage('Failed to delete report', true)
+      });
     });
   }
 
   // ==================== HELPERS ====================
+
+  private openConfirmDialog(data: ConfirmDialogData) {
+    return this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data
+    }).afterClosed();
+  }
 
   private showMessage(message: string, isError = false): void {
     this.snackBar.open(message, 'Close', {

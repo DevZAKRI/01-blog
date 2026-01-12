@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class ReportRequest {
-    @NotBlank
-    @Size(max = 2000)
+    @NotBlank(message = "Report reason is required")
+    @Size(max = 2000, message = "Report reason cannot exceed 2000 characters")
     private String reason;
 }

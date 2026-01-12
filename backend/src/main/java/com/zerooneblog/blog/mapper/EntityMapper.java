@@ -1,7 +1,5 @@
 package com.zerooneblog.blog.mapper;
 
-import java.util.stream.Collectors;
-
 import com.zerooneblog.blog.dto.response.CommentDto;
 import com.zerooneblog.blog.dto.response.NotificationDto;
 import com.zerooneblog.blog.dto.response.PostDto;
@@ -121,10 +119,12 @@ public class EntityMapper {
         d.setId(r.getId());
         if (r.getReporter() != null) d.setReporterId(r.getReporter().getId());
         if (r.getTargetUser() != null) d.setTargetUserId(r.getTargetUser().getId());
+        if (r.getTargetPost() != null) d.setTargetPostId(r.getTargetPost().getId());
         d.setReason(r.getReason());
         d.setStatus(r.getStatus());
         if (r.getReporter() != null) d.setReporter(toDto(r.getReporter()));
         if (r.getTargetUser() != null) d.setReportedUser(toDto(r.getTargetUser()));
+        if (r.getTargetPost() != null) d.setReportedPost(toDto(r.getTargetPost()));
         d.setCreatedAt(r.getCreatedAt());
         return d;
     }

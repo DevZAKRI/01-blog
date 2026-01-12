@@ -37,6 +37,11 @@
   color: #1a1a1a;
   text-decoration: none;
   transition: color 0.2s;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
 }
 
 .post-username:hover {
@@ -59,12 +64,19 @@
   margin: 0;
   color: #1a1a1a;
   line-height: 1.3;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .post-title h3 {
   margin: 0;
   font-size: 20px;
   font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .post-media {
@@ -495,4 +507,24 @@
   background: rgba(0, 0, 0, 0.5);
   padding: 6px 16px;
   border-radius: 20px;
+}
+
+/* Hidden post notice */
+.hidden-post-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background-color: #fff3cd;
+  color: #856404;
+  font-size: 14px;
+  font-weight: 500;
+  border-top: 1px solid #ffc107;
+}
+
+.hidden-post-notice mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
 }

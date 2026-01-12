@@ -25,6 +25,9 @@
             <mat-error *ngIf="profileForm.get('username')?.hasError('pattern')">
               Only letters, numbers, and underscores allowed
             </mat-error>
+            <mat-error *ngIf="profileForm.get('username')?.hasError('maxlength')">
+              Username cannot exceed 15 characters
+            </mat-error>
           </mat-form-field>
         </div>
 
@@ -42,6 +45,9 @@
             <textarea matInput formControlName="bio" rows="4"
                       placeholder="Tell us about your learning journey..."></textarea>
             <mat-hint>{{ profileForm.get('bio')?.value?.length || 0 }} / 200 characters</mat-hint>
+            <mat-error *ngIf="profileForm.get('bio')?.hasError('maxlength')">
+              Bio cannot exceed 200 characters
+            </mat-error>
           </mat-form-field>
         </div>
 

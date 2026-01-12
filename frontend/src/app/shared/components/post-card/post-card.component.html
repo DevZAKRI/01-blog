@@ -5,7 +5,8 @@
       <a [routerLink]="['/profile', post.authorId]" class="post-username">{{ post.author?.username || post.authorUsername || 'Unknown' }}</a>
       <span class="post-time">{{ getTimeSince(post.createdAt) }} ago</span>
     </div>
-    <button mat-icon-button [matMenuTriggerFor]="menu" class="post-menu-btn" *ngIf="isOwner || authService.isAdmin()">
+    <button mat-icon-button [matMenuTriggerFor]="menu" class="post-menu-btn"
+            *ngIf="isOwner || (!isOwner && authService.isAuthenticated() && !isAuthorAdmin())">
       <mat-icon>more_horiz</mat-icon>
     </button>
     <mat-menu #menu="matMenu">
@@ -13,9 +14,13 @@
         <mat-icon>edit</mat-icon>
         <span>Edit</span>
       </button>
-      <button mat-menu-item (click)="onDelete()">
+      <button mat-menu-item (click)="onDelete()" *ngIf="isOwner">
         <mat-icon>delete</mat-icon>
         <span>Delete</span>
+      </button>
+      <button mat-menu-item (click)="onReport()" *ngIf="!isOwner && authService.isAuthenticated() && !isAuthorAdmin()">
+        <mat-icon>flag</mat-icon>
+        <span>Report</span>
       </button>
     </mat-menu>
   </div>
@@ -189,7 +194,13 @@
     <span class="stat" *ngIf="post.commentsCount > 0">{{ post.commentsCount }} {{ post.commentsCount === 1 ? 'comment' : 'comments' }}</span>
   </div>
 
-  <div class="post-actions" *ngIf="showActions">
+  <!-- Hidden post indicator -->
+  <div class="hidden-post-notice" *ngIf="post.hidden">
+    <mat-icon>visibility_off</mat-icon>
+    <span>This post is hidden</span>
+  </div>
+
+  <div class="post-actions" *ngIf="showActions && !post.hidden">
     <button mat-button class="action-btn like-btn" (click)="onLike()" [class.liked]="post.isLiked" [disabled]="isLikingInProgress">
       <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
       <span>{{ post.isLiked ? 'Unlike' : 'Like' }}</span>

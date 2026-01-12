@@ -61,7 +61,7 @@ export class EditPostDialogComponent implements OnInit {
   private initializeForm(): void {
     this.postForm = this.fb.group({
       title: [this.data.post.title || '', [Validators.required, Validators.maxLength(200)]],
-      description: [this.data.post.description || '', [Validators.required, Validators.minLength(1)]]
+      description: [this.data.post.description || '', [Validators.required, Validators.minLength(1), Validators.maxLength(5000)]]
     });
 
     // Load existing media URLs

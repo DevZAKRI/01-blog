@@ -26,16 +26,24 @@ public class JwtUtil {
     private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
     /**
-     * Generate JWT token with user email and role
+     * Generate JWT token with user email, role, and token version
      */
-    public String generateToken(String email, String role) {
+    public String generateToken(String email, String role, Long tokenVersion) {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role)
+                .claim("tokenVersion", tokenVersion != null ? tokenVersion : 0L)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
+    }
+
+    /**
+     * Generate JWT token (backward compatible - uses tokenVersion 0)
+     */
+    public String generateToken(String email, String role) {
+        return generateToken(email, role, 0L);
     }
 
     public boolean isValidToken(String token) {
@@ -44,6 +52,27 @@ public class JwtUtil {
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    public Claims getClaims(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+    }
+
+    public String getEmailFromToken(String token) {
+        return getClaims(token).getSubject();
+    }
+
+    public Long getTokenVersion(String token) {
+        try {
+            Claims claims = getClaims(token);
+            Object version = claims.get("tokenVersion");
+            if (version instanceof Number) {
+                return ((Number) version).longValue();
+            }
+            return 0L;
+        } catch (Exception e) {
+            return 0L;
         }
     }
 

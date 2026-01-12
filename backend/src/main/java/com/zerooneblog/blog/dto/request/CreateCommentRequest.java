@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class CreateCommentRequest {
-    @NotBlank
-    @Size(max = 2000)
+    @NotBlank(message = "Comment text is required")
+    @Size(max = 2000, message = "Comment cannot exceed 2000 characters")
     private String text;
 }

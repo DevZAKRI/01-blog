@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.zerooneblog.blog.exception.BadRequestException;
 import com.zerooneblog.blog.exception.NotFoundException;
 import com.zerooneblog.blog.model.Comment;
 import com.zerooneblog.blog.model.Post;
@@ -36,6 +37,12 @@ public class CommentService {
             logger.severe("[CommentService] addComment() - Post not found: " + postId);
             return new NotFoundException("Post not found");
         });
+        
+        // Reject comments on hidden posts (unless user is admin)
+        if (post.isHidden() && !"ADMIN".equals(user.getRole())) {
+            throw new BadRequestException("Cannot comment on hidden posts");
+        }
+        
         logger.fine("[CommentService] addComment() - Step 2: Post found, author: " + post.getAuthor().getUsername());
         
         logger.fine("[CommentService] addComment() - Step 3: Creating comment object");

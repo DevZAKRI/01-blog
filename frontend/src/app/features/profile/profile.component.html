@@ -40,8 +40,11 @@
           <mat-icon>{{ isSubscribed ? 'person_remove' : 'person_add' }}</mat-icon>
           {{ isSubscribed ? 'Following' : 'Follow' }}
         </button>
-        <button mat-icon-button (click)="onReport()" *ngIf="!isOwner" class="report-btn">
+        <button mat-icon-button (click)="onReport()" *ngIf="!isOwner && user.role !== 'ADMIN'" class="report-btn" matTooltip="Report User">
           <mat-icon>flag</mat-icon>
+        </button>
+        <button mat-icon-button disabled *ngIf="!isOwner && user.role === 'ADMIN'" class="report-btn" matTooltip="Cannot report admins">
+          <mat-icon>shield</mat-icon>
         </button>
       </div>
     </div>
