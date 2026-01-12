@@ -65,14 +65,10 @@ export class FeedComponent implements OnInit {
     const post = this.posts.find(p => p.id === postId);
     if (!post) return;
 
-    const action = post.isLiked
-      ? this.postService.unlikePost(postId)
-      : this.postService.likePost(postId);
-
-    action.subscribe({
-      next: () => {
-        post.isLiked = !post.isLiked;
-        post.likesCount += post.isLiked ? 1 : -1;
+    this.postService.toggleLike(postId).subscribe({
+      next: (res) => {
+        post.isLiked = res.liked;
+        post.likesCount += res.liked ? 1 : -1;
       },
       error: () => {
         this.snackBar.open('Action failed', 'Close', { duration: 3000 });

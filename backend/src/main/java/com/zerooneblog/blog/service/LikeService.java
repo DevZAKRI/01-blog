@@ -19,13 +19,18 @@ public class LikeService {
         this.postRepository = postRepository;
     }
 
-    public void like(Long postId, User user) {
+    public boolean toggleLike(Long postId, User user) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
-        likeRepository.findByUserAndPost(user, post).ifPresent(l -> { throw new IllegalStateException("Already liked"); });
+        var existing = likeRepository.findByUserAndPost(user, post);
+        if (existing.isPresent()) {
+            likeRepository.delete(existing.get());
+            return false; // unliked
+        }
         PostLike l = new PostLike();
         l.setPost(post);
         l.setUser(user);
         likeRepository.save(l);
+        return true; // liked
     }
 
     public void unlike(Long postId, User user) {

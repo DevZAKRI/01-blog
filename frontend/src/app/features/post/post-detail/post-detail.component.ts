@@ -81,15 +81,11 @@ export class PostDetailComponent implements OnInit {
   onLike(): void {
     if (!this.post) return;
 
-    const action = this.post.isLiked
-      ? this.postService.unlikePost(this.post.id)
-      : this.postService.likePost(this.post.id);
-
-    action.subscribe({
-      next: () => {
+    this.postService.toggleLike(this.post.id).subscribe({
+      next: (res) => {
         if (this.post) {
-          this.post.isLiked = !this.post.isLiked;
-          this.post.likesCount += this.post.isLiked ? 1 : -1;
+          this.post.isLiked = res.liked;
+          this.post.likesCount += res.liked ? 1 : -1;
         }
       },
       error: () => {

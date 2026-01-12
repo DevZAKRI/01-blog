@@ -1,14 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
 import { AvatarPipe } from '../../core/pipes/avatar.pipe';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 interface User {
   id: number;
@@ -26,11 +31,14 @@ interface User {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    MatInputModule,
+    MatFormFieldModule,
     AvatarPipe
   ],
   templateUrl: './explore.component.html',
@@ -44,6 +52,8 @@ export class ExploreComponent implements OnInit {
   hasMore = true;
   subscribingUsers = new Set<number>();
   currentUserId: number | null = null;
+  searchQuery = '';
+  private searchSubject = new Subject<string>();
 
   constructor(
     private userService: UserService,
@@ -58,6 +68,27 @@ export class ExploreComponent implements OnInit {
     this.currentUserId = currentUser?.id ? Number(currentUser.id) : null;
     console.log('[Explore] Current user ID:', this.currentUserId);
 
+    // Setup search debounce
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(query => {
+      this.searchQuery = query;
+      this.resetAndLoad();
+    });
+
+    this.loadUsers();
+  }
+
+  onSearchInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchSubject.next(value);
+  }
+
+  resetAndLoad(): void {
+    this.users = [];
+    this.page = 0;
+    this.hasMore = true;
     this.loadUsers();
   }
 
@@ -66,8 +97,8 @@ export class ExploreComponent implements OnInit {
     if (this.isLoading && this.page > 0) return; // Only prevent duplicate loads after first load
 
     this.isLoading = true;
-    console.log('[Explore] Loading users - page:', this.page, 'size:', this.size);
-    this.userService.getUsers(this.page, this.size).subscribe({
+    console.log('[Explore] Loading users - page:', this.page, 'size:', this.size, 'search:', this.searchQuery);
+    this.userService.getUsers(this.page, this.size, this.searchQuery).subscribe({
       next: (response) => {
         console.log('[Explore] Received users:', response);
         // Log subscription status for each user

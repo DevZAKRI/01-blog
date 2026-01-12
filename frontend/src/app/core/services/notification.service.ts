@@ -29,6 +29,11 @@ export class NotificationService {
       .pipe(tap(() => this.updateUnreadCount()));
   }
 
+  markAsUnread(notificationId: string): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/notifications/${notificationId}/unread`, {})
+      .pipe(tap(() => this.updateUnreadCount()));
+  }
+
   markAllAsRead(): Observable<void> {
     return this.http.post<void>(`${environment.apiUrl}/notifications/mark-all-read`, {})
       .pipe(tap(() => this.unreadCountSubject.next(0)));
@@ -41,8 +46,8 @@ export class NotificationService {
   }
 
   private updateUnreadCount(): void {
-    this.http.get<{ unread: number }>(`${environment.apiUrl}/notifications/unread-count`).subscribe({
-      next: (res) => this.unreadCountSubject.next(res.unread || 0),
+    this.http.get<{ unreadCount: number }>(`${environment.apiUrl}/notifications/unread-count`).subscribe({
+      next: (res) => this.unreadCountSubject.next(res.unreadCount ?? 0),
       error: () => {}
     });
   }

@@ -37,15 +37,14 @@ public class PostService {
         }
         
         logger.info("[PostService] create() - Step 2: Saving post to database");
-        logger.fine("[PostService] Post details - Title: " + p.getTitle() + ", Author ID: " + p.getAuthor().getId());
         Post saved = postRepository.save(p);
         logger.info("[PostService] create() - Step 3: Post saved with ID: " + saved.getId());
         
-        // notify subscribers
+        // Notify subscribers (not the author themselves)
         logger.info("[PostService] create() - Step 4: Notifying subscribers");
         User author = saved.getAuthor();
         
-        // Get all subscriber IDs
+        // Get all users who are subscribed to this author
         java.util.List<com.zerooneblog.blog.model.Subscription> subscriptions = 
             subscriptionRepository.findAll().stream()
                 .filter(s -> s.getUserId().equals(author.getId()))
@@ -54,15 +53,22 @@ public class PostService {
         logger.info("[PostService] create() - Subscriber count: " + subscriptions.size());
         
         if (!subscriptions.isEmpty()) {
+            String postTitle = saved.getTitle() != null && !saved.getTitle().isBlank() 
+                ? saved.getTitle() 
+                : "a new post";
+            
             subscriptions.forEach(sub -> {
-                try {
-                    User subscriber = userRepository.findById(sub.getSubscriberId()).orElse(null);
-                    if (subscriber != null) {
-                        notificationService.createNotification(subscriber, "new_post", 
-                            "New post from " + author.getUsername());
+                // Don't notify the author about their own post
+                if (!sub.getSubscriberId().equals(author.getId())) {
+                    try {
+                        User subscriber = userRepository.findById(sub.getSubscriberId()).orElse(null);
+                        if (subscriber != null) {
+                            notificationService.createNotification(subscriber, "new_post", 
+                                "@" + author.getUsername() + " posted: " + postTitle, author.getId());
+                        }
+                    } catch (Exception e) {
+                        logger.severe("[PostService] ERROR: Failed to notify user " + sub.getSubscriberId() + ": " + e.getMessage());
                     }
-                } catch (Exception e) {
-                    logger.severe("[PostService] ERROR: Failed to notify user " + sub.getSubscriberId() + ": " + e.getMessage());
                 }
             });
         }
@@ -143,6 +149,6 @@ public class PostService {
         
         // Get users from IDs
         java.util.Set<User> subscribedUsers = new java.util.HashSet<>(userRepository.findAllById(subscribedUserIds));
-        return postRepository.findByAuthorInAndHiddenFalse(subscribedUsers, pageable);
+        return postRepository.findByAuthorInAndHiddenFalseOrderByCreatedAtDesc(subscribedUsers, pageable);
     }
 }

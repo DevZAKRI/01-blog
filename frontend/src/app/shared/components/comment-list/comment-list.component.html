@@ -2,7 +2,7 @@
   <mat-list-item *ngFor="let comment of comments" class="comment-item">
     <div class="comment-container">
       <div class="comment-header">
-        <img [src]="comment.user | avatar:'32x32'"
+        <img [src]="comment | avatar:'32x32'"
              alt="Avatar"
              class="comment-avatar">
         <div class="comment-info">

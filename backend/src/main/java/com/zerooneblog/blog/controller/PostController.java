@@ -133,6 +133,6 @@ public class PostController {
     @GetMapping
     public Page<PostDto> list(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size, Authentication auth) {
         User u = (auth == null) ? null : currentUser(auth);
-        return postRepository.findAllByHiddenFalse(PageRequest.of(page, size)).map(p -> EntityMapper.toDto(p, u));
+        return postRepository.findAllByHiddenFalseOrderByCreatedAtDesc(PageRequest.of(page, size)).map(p -> EntityMapper.toDto(p, u));
     }
 }

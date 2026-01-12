@@ -9,6 +9,19 @@ h2 {
   color: #333;
 }
 
+.search-container {
+  margin-bottom: 24px;
+}
+
+.search-field {
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-field mat-icon {
+  color: #666;
+}
+
 .users-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

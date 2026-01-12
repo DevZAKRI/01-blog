@@ -1,15 +1,11 @@
-export enum NotificationType {
-  LIKE = 'LIKE',
-  COMMENT = 'COMMENT',
-  SUBSCRIPTION = 'SUBSCRIPTION'
-}
+export type NotificationType = 'new_subscriber' | 'new_post';
 
 export interface Notification {
   id: string;
-  userId: string;
+  receiverId: string;
+  actorId?: string;
   type: NotificationType;
-  message: string;
-  relatedId?: string;
+  content: string;
   isRead: boolean;
   createdAt: string;
 }

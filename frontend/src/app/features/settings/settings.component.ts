@@ -48,7 +48,7 @@ export class SettingsComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {
     this.profileForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
+      username: ['', [Validators.required, Validators.minLength(3), Validators.pattern(/^[a-zA-Z0-9_]+$/)]],
       fullName: [''],
       bio: ['', Validators.maxLength(200)],
       avatar: ['']

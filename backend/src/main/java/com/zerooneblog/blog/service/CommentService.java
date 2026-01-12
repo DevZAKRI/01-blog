@@ -60,7 +60,7 @@ public class CommentService {
             logger.severe("[CommentService] listComments() - Post not found: " + postId);
             return new NotFoundException("Post not found");
         });
-        Page<Comment> result = commentRepository.findByPost(post, pageable);
+        Page<Comment> result = commentRepository.findByPostOrderByCreatedAtDesc(post, pageable);
         logger.info("[CommentService] listComments() - Found " + result.getTotalElements() + " total comments");
         return result;
     }

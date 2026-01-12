@@ -1,6 +1,6 @@
 <div class="post-card">
   <div class="post-header">
-    <img [src]="post.author | avatar:'48x48'" alt="Avatar" class="post-avatar">
+    <img [src]="post | avatar:'48x48'" alt="Avatar" class="post-avatar">
     <div class="post-user-info">
       <a [routerLink]="['/profile', post.authorId]" class="post-username">{{ post.author?.username || post.authorUsername || 'Unknown' }}</a>
       <span class="post-time">{{ getTimeSince(post.createdAt) }} ago</span>

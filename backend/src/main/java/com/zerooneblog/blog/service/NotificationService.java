@@ -20,12 +20,17 @@ public class NotificationService {
     }
 
     public Notification createNotification(User receiver, String type, String content) {
+        return createNotification(receiver, type, content, null);
+    }
+
+    public Notification createNotification(User receiver, String type, String content, Long actorId) {
         logger.info("[NotificationService] createNotification() - Creating notification for user: " + receiver.getUsername() + ", type: " + type);
         try {
             Notification n = new Notification();
             n.setReceiver(receiver);
             n.setType(type);
             n.setContent(content);
+            n.setActorId(actorId);
             Notification saved = notificationRepository.save(n);
             logger.info("[NotificationService] createNotification() - Notification created with ID: " + saved.getId());
             return saved;
@@ -35,10 +40,22 @@ public class NotificationService {
         }
     }
 
+    @org.springframework.transaction.annotation.Transactional
+    public void deleteNotification(User receiver, String type, Long actorId) {
+        logger.info("[NotificationService] deleteNotification() - Deleting notification for user: " + receiver.getUsername() + ", type: " + type + ", actorId: " + actorId);
+        try {
+            notificationRepository.deleteByReceiverAndTypeAndActorId(receiver, type, actorId);
+            logger.info("[NotificationService] deleteNotification() - Notification deleted successfully");
+        } catch (Exception e) {
+            logger.severe("[NotificationService] deleteNotification() - Error deleting notification: " + e.getMessage());
+            // Don't rethrow - this is not critical
+        }
+    }
+
     public Page<Notification> list(User receiver, Pageable pageable) {
         logger.info("[NotificationService] list() - Listing notifications for user: " + receiver.getUsername());
         try {
-            Page<Notification> result = notificationRepository.findByReceiver(receiver, pageable);
+            Page<Notification> result = notificationRepository.findByReceiverOrderByCreatedAtDesc(receiver, pageable);
             logger.info("[NotificationService] list() - Found " + result.getTotalElements() + " total notifications");
             return result;
         } catch (Exception e) {

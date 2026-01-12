@@ -59,31 +59,19 @@ export class PostCardComponent {
     if (this.isLikingInProgress) return;
 
     this.isLikingInProgress = true;
-    if (this.post.isLiked) {
-      this.postService.unlikePost(this.post.id).subscribe({
-        next: () => {
-          this.post.isLiked = false;
-          this.post.likesCount--;
-          this.isLikingInProgress = false;
-        },
-        error: () => {
-          this.snackBar.open('Failed to unlike post', 'Close', { duration: 2000 });
-          this.isLikingInProgress = false;
-        }
-      });
-    } else {
-      this.postService.likePost(this.post.id).subscribe({
-        next: () => {
-          this.post.isLiked = true;
-          this.post.likesCount++;
-          this.isLikingInProgress = false;
-        },
-        error: () => {
-          this.snackBar.open('Failed to like post', 'Close', { duration: 2000 });
-          this.isLikingInProgress = false;
-        }
-      });
-    }
+    const wasLiked = this.post.isLiked;
+
+    this.postService.toggleLike(this.post.id).subscribe({
+      next: (res) => {
+        this.post.isLiked = res.liked;
+        this.post.likesCount += res.liked ? 1 : -1;
+        this.isLikingInProgress = false;
+      },
+      error: () => {
+        this.snackBar.open('Failed to update like', 'Close', { duration: 2000 });
+        this.isLikingInProgress = false;
+      }
+    });
   }
 
   onComment(): void {

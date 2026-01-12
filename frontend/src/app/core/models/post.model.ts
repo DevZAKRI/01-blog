@@ -4,6 +4,7 @@ export interface Post {
   id: string;
   authorId: string;
   authorUsername: string;
+  authorAvatar?: string;
   title: string;
   description: string;
   mediaUrls?: string[];

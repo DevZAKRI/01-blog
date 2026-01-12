@@ -8,7 +8,7 @@
 
   <mat-card class="post-detail-card">
     <mat-card-header>
-      <img [src]="post.author | avatar:'64x64'" alt="Avatar" class="post-avatar">
+      <img [src]="post | avatar:'64x64'" alt="Avatar" class="post-avatar">
       <div class="post-user-info">
         <a [routerLink]="['/profile', post.authorId]" class="post-username">
           {{ post.author?.username || post.authorUsername || 'Unknown' }}

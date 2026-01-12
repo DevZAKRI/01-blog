@@ -9,5 +9,6 @@ import com.zerooneblog.blog.model.Post;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findByPost(Post post, Pageable pageable);
+    Page<Comment> findByPostOrderByCreatedAtDesc(Post post, Pageable pageable);
     long countByPost(Post post);
 }

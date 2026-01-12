@@ -12,14 +12,11 @@
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
-          <label class="form-label">Username/Email</label>
+          <label class="form-label">Username or Email</label>
           <mat-form-field appearance="outline" class="full-width">
-            <input matInput type="email" formControlName="email" placeholder="Enter your username or email">
-            <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
-              Email is required
-            </mat-error>
-            <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
-              Please enter a valid email
+            <input matInput type="text" formControlName="username" placeholder="Enter your username or email">
+            <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
+              Username or email is required
             </mat-error>
           </mat-form-field>
         </div>
@@ -29,7 +26,7 @@
           <mat-form-field appearance="outline" class="full-width">
             <input matInput [type]="hidePassword ? 'password' : 'text'"
                    formControlName="password" placeholder="Enter your password">
-           
+
             <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
               Password is required
             </mat-error>

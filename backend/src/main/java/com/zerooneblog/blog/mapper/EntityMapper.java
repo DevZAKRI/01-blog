@@ -31,7 +31,8 @@ public class EntityMapper {
         d.setUsername(u.getUsername());
         d.setEmail(u.getEmail());
         d.setBio(u.getBio());
-        d.setAvatar(u.getAvatarUrl() == null || u.getAvatarUrl().isBlank() ? "/uploads/default-avatar.svg" : u.getAvatarUrl());
+        // Return actual avatar or null - frontend will use robohash for null
+        d.setAvatar(u.getAvatarUrl() == null || u.getAvatarUrl().isBlank() ? null : u.getAvatarUrl());
         d.setBanned(u.isBanned());
         d.setCreatedAt(u.getCreatedAt());
         d.setRole(u.getRole());
@@ -46,7 +47,13 @@ public class EntityMapper {
         if (p == null) return null;
         PostDto d = new PostDto();
         d.setId(p.getId());
-        if (p.getAuthor() != null) { d.setAuthorId(p.getAuthor().getId()); d.setAuthorUsername(p.getAuthor().getUsername()); }
+        if (p.getAuthor() != null) {
+            d.setAuthorId(p.getAuthor().getId());
+            d.setAuthorUsername(p.getAuthor().getUsername());
+            // Return actual avatar or null - frontend will use robohash for null
+            String avatar = p.getAuthor().getAvatarUrl();
+            d.setAuthorAvatar(avatar == null || avatar.isBlank() ? null : avatar);
+        }
         d.setTitle(p.getTitle());
         d.setDescription(p.getDescription());
 
@@ -82,7 +89,13 @@ public class EntityMapper {
         if (c == null) return null;
         CommentDto d = new CommentDto();
         d.setId(c.getId());
-        if (c.getUser() != null) { d.setUserId(c.getUser().getId()); d.setUsername(c.getUser().getUsername()); }
+        if (c.getUser() != null) {
+            d.setUserId(c.getUser().getId());
+            d.setUsername(c.getUser().getUsername());
+            // Return actual avatar or null - frontend will use robohash for null
+            String avatar = c.getUser().getAvatarUrl();
+            d.setUserAvatar(avatar == null || avatar.isBlank() ? null : avatar);
+        }
         if (c.getPost() != null) d.setPostId(c.getPost().getId());
         d.setText(c.getText());
         d.setCreatedAt(c.getCreatedAt());
@@ -94,6 +107,7 @@ public class EntityMapper {
         NotificationDto d = new NotificationDto();
         d.setId(n.getId());
         if (n.getReceiver() != null) d.setReceiverId(n.getReceiver().getId());
+        d.setActorId(n.getActorId());
         d.setType(n.getType());
         d.setContent(n.getContent());
         d.setRead(n.isRead());

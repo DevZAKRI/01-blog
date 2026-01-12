@@ -42,10 +42,11 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest body) {
-        if (userRepository.existsByUsername(body.getUsername())) {
+        // Case-insensitive duplicate checks
+        if (userRepository.existsByUsernameIgnoreCase(body.getUsername())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already taken");
         }
-        if (userRepository.existsByEmail(body.getEmail())) {
+        if (userRepository.existsByEmailIgnoreCase(body.getEmail())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already in use");
         }
 
@@ -63,13 +64,26 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest body) {
+        // Support login with either username or email
+        String identifier = body.getUsername();
+        User user;
+        
+        // Check if identifier is an email (contains @)
+        if (identifier.contains("@")) {
+            user = userRepository.findByEmailIgnoreCase(identifier)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
+        } else {
+            user = userRepository.findByUsernameIgnoreCase(identifier)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
+        }
+        
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(body.getUsername(), body.getPassword()));
+            // Authenticate using the actual username from database
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), body.getPassword()));
         } catch (BadCredentialsException ex) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
-        var user = userRepository.findByUsername(body.getUsername()).orElseThrow();
         // create token using email (since all controllers lookup by email)
         String token = jwtUtil.generateToken(new UsernamePasswordAuthenticationToken(user.getEmail(), null, new ArrayList<>()));
         return ResponseEntity.ok(new AuthResponse(token, com.zerooneblog.blog.mapper.EntityMapper.toDto(user)));

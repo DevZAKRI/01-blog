@@ -28,9 +28,9 @@ public class LikeController {
     }
 
     @PostMapping("/{id}/like")
-    public ResponseEntity<?> like(@PathVariable Long id, Authentication auth) {
-        likeService.like(id, currentUser(auth));
-        return ResponseEntity.ok().build();
+    public ResponseEntity<java.util.Map<String, Object>> toggleLike(@PathVariable Long id, Authentication auth) {
+        boolean liked = likeService.toggleLike(id, currentUser(auth));
+        return ResponseEntity.ok(java.util.Map.of("liked", liked));
     }
 
     @DeleteMapping("/{id}/like")

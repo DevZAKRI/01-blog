@@ -10,16 +10,24 @@
 
   <div class="notifications-list" *ngIf="!isLoading">
     <div class="notification-card" *ngFor="let notification of notifications"
-         (click)="markAsRead(notification)"
          [class.unread]="!notification.isRead">
       <div class="notification-icon" [class.unread-icon]="!notification.isRead">
         <mat-icon>{{ getIcon(notification.type) }}</mat-icon>
       </div>
       <div class="notification-content">
-        <p class="notification-message">{{ notification.message }}</p>
-        <span class="notification-time">{{ getTimeSince(notification.createdAt) }} ago</span>
+        <p class="notification-message">{{ notification.content }}</p>
+        <span class="notification-time">{{ getTimeSince(notification.createdAt) }}</span>
       </div>
-      <div class="notification-indicator" *ngIf="!notification.isRead"></div>
+      <div class="notification-actions">
+        <button class="read-toggle-btn"
+                (click)="toggleReadStatus(notification, $event)"
+                [title]="notification.isRead ? 'Mark as unread' : 'Mark as read'">
+          <mat-icon>{{ notification.isRead ? 'mark_email_read' : 'mark_email_unread' }}</mat-icon>
+        </button>
+      </div>
+      <div class="notification-status" [class.read]="notification.isRead" [class.unread]="!notification.isRead">
+        <mat-icon>{{ notification.isRead ? 'check_circle' : 'circle' }}</mat-icon>
+      </div>
     </div>
 
     <div class="empty-state" *ngIf="notifications.length === 0">

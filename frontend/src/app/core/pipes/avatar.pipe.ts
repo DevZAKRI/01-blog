@@ -8,20 +8,26 @@ export class AvatarPipe implements PipeTransform {
 
     // if value is a string it's probably already an URL
     if (typeof value === 'string') {
-      return this.resolve(value);
+      return this.resolve(value, 'unknown', size);
     }
 
-    // If value is an object with avatar/avatarUrl/username
-    const avatar = value.avatar ?? value.avatarUrl;
-    const username = value.username ?? value.name ?? 'unknown';
+    // Get username for fallback robohash
+    const username = value.username ?? value.authorUsername ?? value.name ?? 'unknown';
 
-    if (avatar) return this.resolve(avatar);
+    // Check for avatar in various formats (User, Post, Comment)
+    const avatar = value.avatar ?? value.avatarUrl ?? value.authorAvatar ?? value.userAvatar;
+
+    if (avatar) return this.resolve(avatar, username, size);
 
     return this.robo(username, size);
   }
 
-  private resolve(url: string): string {
-    if (!url) return this.robo('unknown', '120x120');
+  private resolve(url: string, username: string, size: string): string {
+    if (!url) return this.robo(username, size);
+
+    // Ignore default-avatar.svg - use robohash instead
+    if (url.includes('default-avatar')) return this.robo(username, size);
+
     // If the URL is already the full API URL or an absolute URL, return it as-is
     if (url.startsWith(environment.apiUrl) || /^https?:\/\//i.test(url)) return url;
 

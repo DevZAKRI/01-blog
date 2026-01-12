@@ -13,4 +13,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findAllByHiddenFalse(Pageable pageable);
     Page<Post> findByAuthorAndHiddenFalse(User author, Pageable pageable);
     Page<Post> findByAuthorInAndHiddenFalse(Iterable<User> authors, Pageable pageable);
+    
+    // Sorted by newest first
+    Page<Post> findAllByHiddenFalseOrderByCreatedAtDesc(Pageable pageable);
+    Page<Post> findByAuthorAndHiddenFalseOrderByCreatedAtDesc(User author, Pageable pageable);
+    Page<Post> findByAuthorInAndHiddenFalseOrderByCreatedAtDesc(Iterable<User> authors, Pageable pageable);
 }

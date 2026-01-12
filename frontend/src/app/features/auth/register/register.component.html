@@ -21,6 +21,9 @@
             <mat-error *ngIf="registerForm.get('username')?.hasError('minlength')">
               Username must be at least 3 characters
             </mat-error>
+            <mat-error *ngIf="registerForm.get('username')?.hasError('pattern')">
+              Only letters, numbers, and underscores allowed
+            </mat-error>
           </mat-form-field>
         </div>
 
@@ -42,7 +45,7 @@
           <mat-form-field appearance="outline" class="full-width">
             <input matInput [type]="hidePassword ? 'password' : 'text'"
                    formControlName="password" placeholder="Create a password">
-           
+
             <mat-error *ngIf="registerForm.get('password')?.hasError('required')">
               Password is required
             </mat-error>

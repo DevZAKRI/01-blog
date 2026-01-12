@@ -53,6 +53,29 @@ export class NotificationsComponent implements OnInit {
     return this.notifications.some(n => !n.isRead);
   }
 
+  toggleReadStatus(notification: Notification, event: Event): void {
+    event.stopPropagation();
+    if (notification.isRead) {
+      this.notificationService.markAsUnread(notification.id).subscribe({
+        next: () => {
+          notification.isRead = false;
+        },
+        error: () => {
+          this.snackBar.open('Failed to mark as unread', 'Close', { duration: 2000 });
+        }
+      });
+    } else {
+      this.notificationService.markAsRead(notification.id).subscribe({
+        next: () => {
+          notification.isRead = true;
+        },
+        error: () => {
+          this.snackBar.open('Failed to mark as read', 'Close', { duration: 2000 });
+        }
+      });
+    }
+  }
+
   markAsRead(notification: Notification): void {
     if (!notification.isRead) {
       this.notificationService.markAsRead(notification.id).subscribe({
@@ -77,9 +100,8 @@ export class NotificationsComponent implements OnInit {
 
   getIcon(type: string): string {
     switch (type) {
-      case 'LIKE': return 'favorite';
-      case 'COMMENT': return 'comment';
-      case 'SUBSCRIPTION': return 'person_add';
+      case 'new_subscriber': return 'person_add';
+      case 'new_post': return 'article';
       default: return 'notifications';
     }
   }

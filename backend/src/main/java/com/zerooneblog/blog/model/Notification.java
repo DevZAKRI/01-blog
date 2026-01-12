@@ -2,6 +2,8 @@ package com.zerooneblog.blog.model;
 
 import java.time.Instant;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,11 +30,16 @@ public class Notification {
     @ManyToOne(fetch = FetchType.LAZY)
     private User receiver;
 
-    private String type; // new_post, new_comment, new_subscriber
+    // The user who triggered the notification (e.g., who followed, who posted)
+    private Long actorId;
+
+    private String type; // new_post, new_subscriber
 
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @JsonProperty("isRead")
+    @Column(name = "is_read")
     private boolean isRead = false;
 
     private Instant createdAt;

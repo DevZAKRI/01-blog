@@ -28,7 +28,7 @@ export interface AuthResponse {
 }
 
 export interface LoginRequest {
-  email: string;
+  username: string; // Can be username or email
   password: string;
 }
 

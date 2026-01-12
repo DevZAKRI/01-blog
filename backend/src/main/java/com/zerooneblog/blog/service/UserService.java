@@ -64,10 +64,10 @@ public class UserService {
         subscription.setSubscriberId(subscriberId);
         subscriptionRepository.save(subscription);
         
-        // Send notification
+        // Send notification with actorId
         try {
             notificationService.createNotification(targetUser, "new_subscriber", 
-                "@" + subscriber.getUsername() + " started following you.");
+                "@" + subscriber.getUsername() + " started following you.", subscriberId);
         } catch (Exception e) {
             // Don't block subscribe on notification failure
         }
@@ -75,7 +75,16 @@ public class UserService {
 
     @Transactional
     public void unsubscribe(Long userId, Long subscriberId) {
+        // Delete the subscription
         subscriptionRepository.deleteByUserIdAndSubscriberId(userId, subscriberId);
+        
+        // Remove the follow notification
+        try {
+            User targetUser = findById(userId);
+            notificationService.deleteNotification(targetUser, "new_subscriber", subscriberId);
+        } catch (Exception e) {
+            // Don't block unsubscribe on notification failure
+        }
     }
     
     public long getSubscriberCount(Long userId) {
@@ -103,9 +112,17 @@ public class UserService {
         return userRepository.findAll(pageable); 
     }
 
+    @Transactional(readOnly = true)
+    public Page<User> listAll(Pageable pageable, String search) {
+        if (search != null && !search.isBlank()) {
+            return userRepository.findByUsernameContainingIgnoreCase(search.trim(), pageable);
+        }
+        return userRepository.findAll(pageable); 
+    }
+
     public Page<Post> listPostsByAuthor(Long authorId, Pageable pageable) {
         User author = userRepository.findById(authorId).orElseThrow(() -> new NotFoundException("Author not found"));
-        return postRepository.findByAuthorAndHiddenFalse(author, pageable);
+        return postRepository.findByAuthorAndHiddenFalseOrderByCreatedAtDesc(author, pageable);
     }
 
     public User updateProfile(User user, UpdateUserRequest req) {

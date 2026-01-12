@@ -27,8 +27,12 @@ export class UserService {
     );
   }
 
-  getUsers(page: number = 0, size: number = 20): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}/users?page=${page}&size=${size}`).pipe(
+  getUsers(page: number = 0, size: number = 20, search?: string): Observable<any> {
+    let url = `${environment.apiUrl}/users?page=${page}&size=${size}`;
+    if (search && search.trim()) {
+      url += `&search=${encodeURIComponent(search.trim())}`;
+    }
+    return this.http.get<any>(url).pipe(
       map((response) => {
         if (response && response.content) {
           response.content = response.content.map((user: any) => {

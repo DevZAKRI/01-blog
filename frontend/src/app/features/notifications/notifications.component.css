@@ -103,13 +103,60 @@
   color: #666;
 }
 
-.notification-indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #00bcd4;
+.notification-actions {
+  display: flex;
+  align-items: center;
   flex-shrink: 0;
-  margin-top: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.notification-card:hover .notification-actions {
+  opacity: 1;
+}
+
+.read-toggle-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.read-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.read-toggle-btn mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: #666;
+}
+
+.notification-status {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.notification-status mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.notification-status.unread mat-icon {
+  color: #00bcd4;
+}
+
+.notification-status.read mat-icon {
+  color: #ccc;
 }
 
 .empty-state {

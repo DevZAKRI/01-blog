@@ -106,8 +106,12 @@ public class UserController {
     }
 
     @GetMapping
-    public Page<UserDto> listUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size, Authentication auth) {
-        logger.info("[UserController] GET /users - Listing users - page: " + page + ", size: " + size);
+    public Page<UserDto> listUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String search,
+            Authentication auth) {
+        logger.info("[UserController] GET /users - Listing users - page: " + page + ", size: " + size + ", search: " + search);
         try {
             User currentUser = null;
             if (auth != null && auth.getName() != null) {
@@ -119,10 +123,14 @@ public class UserController {
             }
             
             final User finalCurrentUser = currentUser;
-            Page<UserDto> result = userService.listAll(PageRequest.of(page, size)).map(user -> {
+            Page<UserDto> result = userService.listAll(PageRequest.of(page, size), search).map(user -> {
                 UserDto dto = EntityMapper.toDto(user);
                 dto.setSubscriberIds(new java.util.HashSet<>());
                 dto.setSubscriptionIds(new java.util.HashSet<>());
+                
+                // Set subscriber and subscription counts
+                dto.setSubscribersCount(userService.getSubscriberCount(user.getId()));
+                dto.setSubscriptionsCount(userService.getSubscriptionsCount(user.getId()));
                 
                 if (finalCurrentUser != null) {
                     boolean isSubscribed = userService.isSubscribed(user.getId(), finalCurrentUser.getId());
