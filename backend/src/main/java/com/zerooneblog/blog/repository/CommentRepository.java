@@ -11,4 +11,12 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findByPost(Post post, Pageable pageable);
     Page<Comment> findByPostOrderByCreatedAtDesc(Post post, Pageable pageable);
     long countByPost(Post post);
+    
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    void deleteByUser(com.zerooneblog.blog.model.User user);
+    
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    void deleteByPost(Post post);
 }

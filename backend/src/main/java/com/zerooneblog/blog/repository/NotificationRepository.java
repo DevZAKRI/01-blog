@@ -17,4 +17,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     
     // Find notifications by receiver and type
     java.util.List<Notification> findByReceiverAndType(User receiver, String type);
+    
+    // Delete all notifications for a user
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    void deleteByReceiver(User receiver);
 }

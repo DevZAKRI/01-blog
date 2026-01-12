@@ -18,4 +18,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findAllByHiddenFalseOrderByCreatedAtDesc(Pageable pageable);
     Page<Post> findByAuthorAndHiddenFalseOrderByCreatedAtDesc(User author, Pageable pageable);
     Page<Post> findByAuthorInAndHiddenFalseOrderByCreatedAtDesc(Iterable<User> authors, Pageable pageable);
+    
+    // Find all posts by author (for delete cascade)
+    java.util.List<Post> findByAuthor(User author);
+    
+    // Count hidden posts
+    long countByHidden(boolean hidden);
 }

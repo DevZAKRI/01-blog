@@ -1,7 +1,5 @@
 package com.zerooneblog.blog.controller;
 
-import java.util.ArrayList;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -54,11 +52,12 @@ public class AuthController {
         user.setUsername(body.getUsername());
         user.setPassword(passwordEncoder.encode(body.getPassword()));
         user.setEmail(body.getEmail());
+        // Default role is USER (set in entity)
 
         userRepository.save(user);
 
-        // create token using email (since all controllers lookup by email)
-        String token = jwtUtil.generateToken(new UsernamePasswordAuthenticationToken(user.getEmail(), null, new ArrayList<>()));
+        // Generate token with email and role
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
         return ResponseEntity.ok(new AuthResponse(token, com.zerooneblog.blog.mapper.EntityMapper.toDto(user)));
     }
 
@@ -77,6 +76,11 @@ public class AuthController {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
         }
         
+        // Check if user is banned
+        if (user.isBanned()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Your account has been banned");
+        }
+        
         try {
             // Authenticate using the actual username from database
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), body.getPassword()));
@@ -84,8 +88,8 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
-        // create token using email (since all controllers lookup by email)
-        String token = jwtUtil.generateToken(new UsernamePasswordAuthenticationToken(user.getEmail(), null, new ArrayList<>()));
+        // Generate token with email and role
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
         return ResponseEntity.ok(new AuthResponse(token, com.zerooneblog.blog.mapper.EntityMapper.toDto(user)));
     }
 }

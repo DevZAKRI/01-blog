@@ -5,43 +5,107 @@ import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { User } from '../models/user.model';
 import { Post } from '../models/post.model';
+import { Report } from '../models/report.model';
+
+export interface AdminStats {
+  totalUsers: number;
+  totalPosts: number;
+  pendingReports: number;
+  bannedUsers: number;
+  hiddenPosts: number;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdminService {
+  private readonly apiUrl = `${environment.apiUrl}/admin`;
+
   constructor(private http: HttpClient) {}
 
-  getAllUsers(): Observable<User[]> {
-    return this.http.get<any>(`${environment.apiUrl}/admin/users`).pipe(
-      // backend returns a Page object: { content: [...] }
-      map((page) => page?.content || page)
+  // ==================== STATS ====================
+
+  getStats(): Observable<AdminStats> {
+    return this.http.get<AdminStats>(`${this.apiUrl}/stats`);
+  }
+
+  // ==================== USERS ====================
+
+  getAllUsers(page = 0, size = 20): Observable<User[]> {
+    return this.http.get<any>(`${this.apiUrl}/users`, { params: { page: page.toString(), size: size.toString() } }).pipe(
+      map((response) => response?.content || response)
     );
   }
 
-  getAllPosts(): Observable<Post[]> {
-    return this.http.get<any>(`${environment.apiUrl}/admin/posts`).pipe(
-      map((page) => page?.content || page)
+  getUser(userId: string): Observable<User> {
+    return this.http.get<User>(`${this.apiUrl}/users/${userId}`);
+  }
+
+  banUser(userId: string): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/users/${userId}/ban`, {});
+  }
+
+  unbanUser(userId: string): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/users/${userId}/unban`, {});
+  }
+
+  deleteUser(userId: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/users/${userId}`);
+  }
+
+  updateUserRole(userId: string, role: 'USER' | 'ADMIN'): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/users/${userId}/role`, { role });
+  }
+
+  // ==================== POSTS ====================
+
+  getAllPosts(page = 0, size = 20): Observable<Post[]> {
+    return this.http.get<any>(`${this.apiUrl}/posts`, { params: { page: page.toString(), size: size.toString() } }).pipe(
+      map((response) => response?.content || response)
     );
   }
 
-  banUser(userId: string): Observable<void> {
-    return this.http.put<void>(`${environment.apiUrl}/admin/users/${userId}/ban`, {});
+  getPost(postId: string): Observable<Post> {
+    return this.http.get<Post>(`${this.apiUrl}/posts/${postId}`);
   }
 
-  unbanUser(userId: string): Observable<void> {
-    return this.http.put<void>(`${environment.apiUrl}/admin/users/${userId}/unban`, {});
+  hidePost(postId: string): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/posts/${postId}/hide`, {});
   }
 
-  deletePost(postId: string): Observable<void> {
-    return this.http.delete<void>(`${environment.apiUrl}/admin/posts/${postId}`);
+  unhidePost(postId: string): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/posts/${postId}/unhide`, {});
   }
 
-  hidePost(postId: string): Observable<void> {
-    return this.http.put<void>(`${environment.apiUrl}/admin/posts/${postId}/hide`, {});
+  deletePost(postId: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/posts/${postId}`);
   }
 
-  unhidePost(postId: string): Observable<void> {
-    return this.http.put<void>(`${environment.apiUrl}/admin/posts/${postId}/unhide`, {});
+  // ==================== REPORTS ====================
+
+  getAllReports(page = 0, size = 20, status?: string): Observable<Report[]> {
+    const params: any = { page: page.toString(), size: size.toString() };
+    if (status) {
+      params.status = status;
+    }
+    return this.http.get<any>(`${this.apiUrl}/reports`, { params }).pipe(
+      map((response) => response?.content || response)
+    );
+  }
+
+  getReport(reportId: string): Observable<Report> {
+    return this.http.get<Report>(`${this.apiUrl}/reports/${reportId}`);
+  }
+
+  updateReportStatus(reportId: string, status: string): Observable<Report> {
+    return this.http.patch<Report>(`${this.apiUrl}/reports/${reportId}`, { status });
+  }
+
+  deleteReport(reportId: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/reports/${reportId}`);
+  }
+
+  banReportedUser(reportId: string): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/reports/${reportId}/ban-user`, {});
   }
 }

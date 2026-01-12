@@ -2,11 +2,13 @@ package com.zerooneblog.blog.util;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -23,9 +25,13 @@ public class JwtUtil {
 
     private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
-    public String generateToken(Authentication authentication) {
+    /**
+     * Generate JWT token with user email and role
+     */
+    public String generateToken(String email, String role) {
         return Jwts.builder()
-                .setSubject(authentication.getName())
+                .setSubject(email)
+                .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS512)
@@ -43,7 +49,14 @@ public class JwtUtil {
 
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
-        String username = claims.getSubject();
-        return new UsernamePasswordAuthenticationToken(username, null, new ArrayList<>());
+        String email = claims.getSubject();
+        String role = claims.get("role", String.class);
+        
+        // Create authorities with ROLE_ prefix for Spring Security
+        List<SimpleGrantedAuthority> authorities = Collections.singletonList(
+                new SimpleGrantedAuthority("ROLE_" + (role != null ? role : "USER"))
+        );
+        
+        return new UsernamePasswordAuthenticationToken(email, null, authorities);
     }
 }

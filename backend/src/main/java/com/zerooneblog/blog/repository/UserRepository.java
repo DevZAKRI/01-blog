@@ -22,4 +22,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     // Search by username (case-insensitive)
     Page<User> findByUsernameContainingIgnoreCase(String username, Pageable pageable);
+    
+    // Count banned users
+    long countByBanned(boolean banned);
 }

@@ -21,4 +21,13 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     boolean existsByUserIdAndSubscriberId(Long userId, Long subscriberId);
     
     void deleteByUserIdAndSubscriberId(Long userId, Long subscriberId);
+    
+    // Delete all subscriptions for a user (when user is deleted)
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    void deleteByUserId(Long userId);
+    
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    void deleteBySubscriberId(Long subscriberId);
 }
