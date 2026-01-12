@@ -1,5 +1,7 @@
 package com.zerooneblog.blog.controller;
 
+import java.util.logging.Logger;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,7 @@ import com.zerooneblog.blog.service.CommentService;
 @RestController
 @RequestMapping("/api/v1/posts/{postId}/comments")
 public class CommentController {
+    private static final Logger logger = Logger.getLogger(CommentController.class.getName());
     private final CommentService commentService;
     private final UserRepository userRepository;
     private final com.zerooneblog.blog.service.CommentLikeService commentLikeService;
@@ -37,25 +40,25 @@ public class CommentController {
     @PostMapping
     public ResponseEntity<CommentDto> add(@PathVariable Long postId, @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.zerooneblog.blog.dto.request.CreateCommentRequest req, Authentication auth) {
         try {
-            System.out.println("[COMMENT CREATE] Step 1: Starting comment creation for post ID: " + postId);
-            System.out.println("[COMMENT CREATE] Auth name: " + (auth != null ? auth.getName() : "null"));
-            System.out.println("[COMMENT CREATE] Comment text length: " + (req.getText() != null ? req.getText().length() : 0));
+            logger.info("[CommentController] POST /posts/{postId}/comments - Step 1: Starting comment creation for post ID: " + postId);
+            logger.info("[CommentController] Auth name: " + (auth != null ? auth.getName() : "null"));
+            logger.fine("[CommentController] Comment text length: " + (req.getText() != null ? req.getText().length() : 0));
             
-            System.out.println("[COMMENT CREATE] Step 2: Getting current user");
+            logger.info("[CommentController] Step 2: Getting current user");
             User user = currentUser(auth);
-            System.out.println("[COMMENT CREATE] User ID: " + user.getId() + ", username: " + user.getUsername());
+            logger.info("[CommentController] User ID: " + user.getId() + ", username: " + user.getUsername());
             
-            System.out.println("[COMMENT CREATE] Step 3: Calling commentService.addComment()");
+            logger.info("[CommentController] Step 3: Calling commentService.addComment()");
             Comment c = commentService.addComment(postId, user, req.getText());
-            System.out.println("[COMMENT CREATE] Step 4: Comment saved with ID: " + c.getId());
+            logger.info("[CommentController] Step 4: Comment saved with ID: " + c.getId());
             
-            System.out.println("[COMMENT CREATE] Step 5: Converting to DTO");
+            logger.fine("[CommentController] Step 5: Converting to DTO");
             CommentDto dto = EntityMapper.toDto(c);
-            System.out.println("[COMMENT CREATE] Step 6: Comment creation successful");
+            logger.info("[CommentController] Step 6: Comment creation successful");
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
-            System.err.println("[COMMENT CREATE] ERROR: Exception occurred: " + e.getClass().getName());
-            System.err.println("[COMMENT CREATE] ERROR: Message: " + e.getMessage());
+            logger.severe("[CommentController] ERROR: Exception occurred: " + e.getClass().getName());
+            logger.severe("[CommentController] ERROR: Message: " + e.getMessage());
             e.printStackTrace();
             throw e;
         }
@@ -63,19 +66,41 @@ public class CommentController {
 
     @GetMapping
     public Page<CommentDto> list(@PathVariable Long postId, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
-        return commentService.listComments(postId, PageRequest.of(page, size)).map(EntityMapper::toDto);
+        logger.info("[CommentController] GET /posts/{postId}/comments - Listing comments for post ID: " + postId + ", page: " + page + ", size: " + size);
+        try {
+            Page<CommentDto> result = commentService.listComments(postId, PageRequest.of(page, size)).map(EntityMapper::toDto);
+            logger.info("[CommentController] Comments listed successfully - Total: " + result.getTotalElements() + ", Current page: " + result.getContent().size());
+            return result;
+        } catch (Exception e) {
+            logger.severe("[CommentController] Error listing comments: " + e.getMessage());
+            throw e;
+        }
     }
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<?> delete(@PathVariable Long postId, @PathVariable Long commentId, Authentication auth) {
-        commentService.deleteComment(postId, commentId, currentUser(auth));
-        return ResponseEntity.noContent().build();
+        logger.info("[CommentController] DELETE /posts/{postId}/comments/{commentId} - Deleting comment ID: " + commentId + " from post ID: " + postId);
+        try {
+            commentService.deleteComment(postId, commentId, currentUser(auth));
+            logger.info("[CommentController] Comment deleted successfully");
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            logger.severe("[CommentController] Error deleting comment: " + e.getMessage());
+            throw e;
+        }
     }
 
     @PostMapping("/{commentId}/like")
     public ResponseEntity<?> likeComment(@PathVariable Long postId, @PathVariable Long commentId, Authentication auth) {
-        commentLikeService.like(commentId, currentUser(auth));
-        return ResponseEntity.ok().build();
+        logger.info("[CommentController] POST /posts/{postId}/comments/{commentId}/like - Liking comment ID: " + commentId);
+        try {
+            commentLikeService.like(commentId, currentUser(auth));
+            logger.info("[CommentController] Comment liked successfully");
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            logger.severe("[CommentController] Error liking comment: " + e.getMessage());
+            throw e;
+        }
     }
 
     @DeleteMapping("/{commentId}/like")

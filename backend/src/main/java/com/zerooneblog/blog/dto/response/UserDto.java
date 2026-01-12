@@ -17,4 +17,7 @@ public class UserDto {
     private String role;
     private Set<Long> subscriberIds;
     private Set<Long> subscriptionIds;
+    private boolean subscribed; // if current user is subscribed to this profile
+    private long subscribersCount; // number of followers
+    private long subscriptionsCount; // number of users this user is following
 }

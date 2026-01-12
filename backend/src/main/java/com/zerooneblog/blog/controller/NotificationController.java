@@ -1,5 +1,7 @@
 package com.zerooneblog.blog.controller;
 
+import java.util.logging.Logger;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -18,6 +20,7 @@ import com.zerooneblog.blog.service.NotificationService;
 @RestController
 @RequestMapping("/api/v1/notifications")
 public class NotificationController {
+    private static final Logger logger = Logger.getLogger(NotificationController.class.getName());
     private final NotificationService notificationService;
     private final UserRepository userRepository;
 
@@ -33,37 +36,66 @@ public class NotificationController {
 
     @GetMapping
     public org.springframework.http.ResponseEntity<?> list(Authentication auth, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
-        var result = notificationService.list(currentUser(auth), PageRequest.of(page, size)).map(EntityMapper::toDto);
-        if (result.getTotalElements() == 0) {
-            return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
-                "message", "No notifications yet",
-                "content", result.getContent(),
-                "totalElements", result.getTotalElements()
-            ));
+        logger.info("[NotificationController] GET /notifications - Listing notifications - page: " + page + ", size: " + size);
+        try {
+            var user = currentUser(auth);
+            logger.fine("[NotificationController] User: " + user.getUsername());
+            var result = notificationService.list(user, PageRequest.of(page, size)).map(EntityMapper::toDto);
+            logger.info("[NotificationController] Notifications listed successfully - Total: " + result.getTotalElements() + ", Current page: " + result.getContent().size());
+            if (result.getTotalElements() == 0) {
+                return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
+                    "message", "No notifications yet",
+                    "content", result.getContent(),
+                    "totalElements", result.getTotalElements()
+                ));
+            }
+            return org.springframework.http.ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.severe("[NotificationController] Error listing notifications: " + e.getMessage());
+            throw e;
         }
-        return org.springframework.http.ResponseEntity.ok(result);
     }
 
     @PostMapping("/{id}/read")
     public ResponseEntity<?> markRead(@PathVariable Long id, Authentication auth) {
-        // lightweight: mark read if belongs to user
-        var user = currentUser(auth);
-        notificationService.markRead(id, user, true);
-        return ResponseEntity.ok().build();
+        logger.info("[NotificationController] POST /notifications/{id}/read - Marking notification ID: " + id + " as read");
+        try {
+            var user = currentUser(auth);
+            notificationService.markRead(id, user, true);
+            logger.info("[NotificationController] Notification marked as read successfully");
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            logger.severe("[NotificationController] Error marking notification as read: " + e.getMessage());
+            throw e;
+        }
     }
 
     @PostMapping("/{id}/unread")
     public ResponseEntity<?> markUnread(@PathVariable Long id, Authentication auth) {
-        var user = currentUser(auth);
-        notificationService.markRead(id, user, false);
-        return ResponseEntity.ok().build();
+        logger.info("[NotificationController] POST /notifications/{id}/unread - Marking notification ID: " + id + " as unread");
+        try {
+            var user = currentUser(auth);
+            notificationService.markRead(id, user, false);
+            logger.info("[NotificationController] Notification marked as unread successfully");
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            logger.severe("[NotificationController] Error marking notification as unread: " + e.getMessage());
+            throw e;
+        }
     }
     
     @GetMapping("/unread-count")
     public ResponseEntity<java.util.Map<String, Long>> unreadCount(Authentication auth) {
-        var user = currentUser(auth);
-        long count = notificationService.countUnread(user);
-        return ResponseEntity.ok(java.util.Map.of("unread", count));
+        logger.info("[NotificationController] GET /notifications/unread-count - Getting unread count");
+        try {
+            var user = currentUser(auth);
+            long count = notificationService.countUnread(user);
+            logger.info("[NotificationController] Unread count: " + count);
+            return ResponseEntity.ok(java.util.Map.of("unreadCount", count));
+        } catch (Exception e) {
+            logger.severe("[NotificationController] Error getting unread count: " + e.getMessage());
+            throw e;
+        }
     }
     
     @PostMapping("/mark-all-read")

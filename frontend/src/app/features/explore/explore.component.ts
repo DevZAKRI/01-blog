@@ -18,7 +18,7 @@ interface User {
   avatarUrl?: string;
   subscribersCount?: number;
   subscriptionsCount?: number;
-  isSubscribed?: boolean;
+  subscribed?: boolean;
 }
 
 @Component({
@@ -70,6 +70,10 @@ export class ExploreComponent implements OnInit {
     this.userService.getUsers(this.page, this.size).subscribe({
       next: (response) => {
         console.log('[Explore] Received users:', response);
+        // Log subscription status for each user
+        response.content.forEach((user: User) => {
+          console.log(`[Explore] User ${user.username} (id=${user.id}): subscribed=${user.subscribed}`);
+        });
         this.users.push(...response.content);
         this.hasMore = !response.last;
         this.page++;
@@ -93,8 +97,11 @@ export class ExploreComponent implements OnInit {
     const user = this.users.find(u => u.id === userId);
     if (!user) return;
 
+    console.log(`[Explore] subscribe() called for user ${userId}, current subscribed=${user.subscribed}`);
+
     // Toggle subscription status
-    if (user.isSubscribed) {
+    if (user.subscribed) {
+      console.log(`[Explore] User already subscribed, calling unsubscribe instead`);
       this.unsubscribe(userId, event);
       return;
     }
@@ -103,14 +110,16 @@ export class ExploreComponent implements OnInit {
 
     this.userService.subscribe(userId).subscribe({
       next: () => {
+        console.log(`[Explore] Subscribe API success for user ${userId}`);
         this.snackBar.open('Subscribed successfully!', 'Close', { duration: 2000 });
         this.subscribingUsers.delete(userId);
         // Update user status
         if (user) {
-          user.isSubscribed = true;
+          user.subscribed = true;
           if (user.subscribersCount !== undefined) {
             user.subscribersCount++;
           }
+          console.log(`[Explore] Updated user ${userId}: subscribed=${user.subscribed}`);
         }
       },
       error: (error) => {
@@ -132,7 +141,7 @@ export class ExploreComponent implements OnInit {
         // Update user status
         const user = this.users.find(u => u.id === userId);
         if (user) {
-          user.isSubscribed = false;
+          user.subscribed = false;
           if (user.subscribersCount !== undefined) {
             user.subscribersCount--;
           }

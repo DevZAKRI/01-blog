@@ -17,6 +17,9 @@ export interface User {
   // from backend UserDto
   subscriberIds?: number[];
   subscriptionIds?: number[];
+  subscribed?: boolean;
+  subscribersCount?: number;
+  subscriptionsCount?: number;
 }
 
 export interface AuthResponse {

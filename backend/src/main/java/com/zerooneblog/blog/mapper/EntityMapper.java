@@ -35,10 +35,6 @@ public class EntityMapper {
         d.setBanned(u.isBanned());
         d.setCreatedAt(u.getCreatedAt());
         d.setRole(u.getRole());
-        if (u.getSubscribers() != null)
-            d.setSubscriberIds(u.getSubscribers().stream().map(User::getId).collect(Collectors.toSet()));
-        if (u.getSubscriptions() != null)
-            d.setSubscriptionIds(u.getSubscriptions().stream().map(User::getId).collect(Collectors.toSet()));
         return d;
     }
 

@@ -2,10 +2,21 @@ spring:
   application:
     name: blog
   datasource:
-    url: jdbc:postgresql://localhost:5432/${DB_NAME}
-    username: ${DB_USER:DefaultUser}
-    password: ${DB_PASS:DefaultPass}
+    url: jdbc:postgresql://localhost:5432/blog_db
+    username: ZAKRI
+    password: 'jw52U[6^K/8v'
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  data:
+    web:
+      pageable:
+        one-indexed-parameters: false
+      sort:
+        sort-parameter: sort
+
+logging:
+  level:
+    org.springframework.data.web.PageableHandlerMethodArgumentResolver: ERROR
+    org.springframework.data.web.config.SpringDataJacksonConfiguration: ERROR

@@ -29,30 +29,100 @@
   <div class="post-media-gallery" *ngIf="post.mediaUrls && post.mediaUrls.length > 0">
     <!-- Single Media -->
     <div class="media-container single" *ngIf="post.mediaUrls.length === 1">
-      <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'" [src]="post.mediaUrls[0]" alt="Post image" class="post-image">
-      <video *ngIf="getMediaType(post.mediaUrls[0]) === 'video'" [src]="post.mediaUrls[0]" controls class="post-video"></video>
+      <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'"
+           [src]="post.mediaUrls[0]"
+           alt="Post image"
+           class="post-image"
+           loading="lazy"
+           (error)="onImageError($event)">
+      <video *ngIf="getMediaType(post.mediaUrls[0]) === 'video'"
+             [src]="post.mediaUrls[0]"
+             controls
+             class="post-video"
+             preload="metadata"
+             (error)="onVideoError($event)"></video>
     </div>
 
     <!-- Two Media Items -->
     <div class="media-container two-images" *ngIf="post.mediaUrls.length === 2">
-      <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'" [src]="post.mediaUrls[0]" alt="Post image 1" class="post-image">
-      <video *ngIf="getMediaType(post.mediaUrls[0]) === 'video'" [src]="post.mediaUrls[0]" controls class="post-video"></video>
-      <img *ngIf="getMediaType(post.mediaUrls[1]) === 'image'" [src]="post.mediaUrls[1]" alt="Post image 2" class="post-image">
-      <video *ngIf="getMediaType(post.mediaUrls[1]) === 'video'" [src]="post.mediaUrls[1]" controls class="post-video"></video>
+      <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'"
+           [src]="post.mediaUrls[0]"
+           alt="Post image 1"
+           class="post-image"
+           loading="lazy"
+           (error)="onImageError($event)">
+      <video *ngIf="getMediaType(post.mediaUrls[0]) === 'video'"
+             [src]="post.mediaUrls[0]"
+             controls
+             class="post-video"
+             preload="metadata"
+             (error)="onVideoError($event)"></video>
+      <img *ngIf="getMediaType(post.mediaUrls[1]) === 'image'"
+           [src]="post.mediaUrls[1]"
+           alt="Post image 2"
+           class="post-image"
+           loading="lazy"
+           (error)="onImageError($event)">
+      <video *ngIf="getMediaType(post.mediaUrls[1]) === 'video'"
+             [src]="post.mediaUrls[1]"
+             controls
+             class="post-video"
+             preload="metadata"
+             (error)="onVideoError($event)"></video>
     </div>
 
     <!-- Three or Four Media Items -->
     <div class="media-container multi-images" *ngIf="post.mediaUrls.length >= 3">
-      <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'" [src]="post.mediaUrls[0]" alt="Post image 1" class="post-image large">
-      <video *ngIf="getMediaType(post.mediaUrls[0]) === 'video'" [src]="post.mediaUrls[0]" controls class="post-video large"></video>
+      <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'"
+           [src]="post.mediaUrls[0]"
+           alt="Post image 1"
+           class="post-image large"
+           loading="lazy"
+           (error)="onImageError($event)">
+      <video *ngIf="getMediaType(post.mediaUrls[0]) === 'video'"
+             [src]="post.mediaUrls[0]"
+             controls
+             class="post-video large"
+             preload="metadata"
+             (error)="onVideoError($event)"></video>
       <div class="image-grid">
-        <img *ngIf="getMediaType(post.mediaUrls[1]) === 'image'" [src]="post.mediaUrls[1]" alt="Post image 2" class="post-image">
-        <video *ngIf="getMediaType(post.mediaUrls[1]) === 'video'" [src]="post.mediaUrls[1]" controls class="post-video"></video>
-        <img *ngIf="getMediaType(post.mediaUrls[2]) === 'image'" [src]="post.mediaUrls[2]" alt="Post image 3" class="post-image">
-        <video *ngIf="getMediaType(post.mediaUrls[2]) === 'video'" [src]="post.mediaUrls[2]" controls class="post-video"></video>
+        <img *ngIf="getMediaType(post.mediaUrls[1]) === 'image'"
+             [src]="post.mediaUrls[1]"
+             alt="Post image 2"
+             class="post-image"
+             loading="lazy"
+             (error)="onImageError($event)">
+        <video *ngIf="getMediaType(post.mediaUrls[1]) === 'video'"
+               [src]="post.mediaUrls[1]"
+               controls
+               class="post-video"
+               preload="metadata"
+               (error)="onVideoError($event)"></video>
+        <img *ngIf="getMediaType(post.mediaUrls[2]) === 'image'"
+             [src]="post.mediaUrls[2]"
+             alt="Post image 3"
+             class="post-image"
+             loading="lazy"
+             (error)="onImageError($event)">
+        <video *ngIf="getMediaType(post.mediaUrls[2]) === 'video'"
+               [src]="post.mediaUrls[2]"
+               controls
+               class="post-video"
+               preload="metadata"
+               (error)="onVideoError($event)"></video>
         <ng-container *ngIf="post.mediaUrls.length === 4">
-          <img *ngIf="getMediaType(post.mediaUrls[3]) === 'image'" [src]="post.mediaUrls[3]" alt="Post image 4" class="post-image">
-          <video *ngIf="getMediaType(post.mediaUrls[3]) === 'video'" [src]="post.mediaUrls[3]" controls class="post-video"></video>
+          <img *ngIf="getMediaType(post.mediaUrls[3]) === 'image'"
+               [src]="post.mediaUrls[3]"
+               alt="Post image 4"
+               class="post-image"
+               loading="lazy"
+               (error)="onImageError($event)">
+          <video *ngIf="getMediaType(post.mediaUrls[3]) === 'video'"
+                 [src]="post.mediaUrls[3]"
+                 controls
+                 class="post-video"
+                 preload="metadata"
+                 (error)="onVideoError($event)"></video>
         </ng-container>
         <div class="image-placeholder" *ngIf="post.mediaUrls.length === 3"></div>
       </div>
@@ -77,9 +147,9 @@
       <mat-icon>chat_bubble_outline</mat-icon>
       <span>Comment</span>
     </button>
-    <button mat-button class="action-btn share-btn">
-      <mat-icon>share</mat-icon>
-      <span>Share</span>
+    <button mat-button class="action-btn" [routerLink]="['/post', post.id]">
+      <mat-icon>open_in_new</mat-icon>
+      <span>View</span>
     </button>
   </div>
 </div>

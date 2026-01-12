@@ -1,0 +1,175 @@
+<div class="post-detail-container" *ngIf="!isLoading && post">
+  <div class="post-header-row">
+    <button mat-icon-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>Post Details</h1>
+  </div>
+
+  <mat-card class="post-detail-card">
+    <mat-card-header>
+      <img [src]="post.author | avatar:'64x64'" alt="Avatar" class="post-avatar">
+      <div class="post-user-info">
+        <a [routerLink]="['/profile', post.authorId]" class="post-username">
+          {{ post.author?.username || post.authorUsername || 'Unknown' }}
+        </a>
+        <span class="post-time">{{ getTimeSince(post.createdAt) }} ago</span>
+        <button mat-icon-button [matMenuTriggerFor]="menu" class="post-menu-btn" *ngIf="isOwner">
+          <mat-icon>more_horiz</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="onEdit()">
+            <mat-icon>edit</mat-icon>
+            <span>Edit</span>
+          </button>
+          <button mat-menu-item (click)="onDelete()">
+            <mat-icon>delete</mat-icon>
+            <span>Delete</span>
+          </button>
+        </mat-menu>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Title -->
+      <div class="post-title" *ngIf="post.title">
+        <h2>{{ post.title }}</h2>
+      </div>
+
+      <!-- Description -->
+      <div class="post-description">
+        <p>{{ post.description }}</p>
+      </div>
+
+      <!-- Media Gallery -->
+      <div class="post-media-gallery" *ngIf="post.mediaUrls && post.mediaUrls.length > 0">
+        <!-- Single Media -->
+        <div class="media-container single" *ngIf="post.mediaUrls.length === 1">
+          <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'"
+               [src]="post.mediaUrls[0]"
+               alt="Post image"
+               class="post-image"
+               loading="lazy"
+               (error)="onImageError($event)">
+          <video *ngIf="getMediaType(post.mediaUrls[0]) === 'video'"
+                 [src]="post.mediaUrls[0]"
+                 controls
+                 class="post-video"
+                 preload="metadata"
+                 (error)="onVideoError($event)"></video>
+        </div>
+
+        <!-- Two Media Items -->
+        <div class="media-container two-images" *ngIf="post.mediaUrls.length === 2">
+          <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'"
+               [src]="post.mediaUrls[0]"
+               alt="Post image 1"
+               class="post-image"
+               loading="lazy"
+               (error)="onImageError($event)">
+          <video *ngIf="getMediaType(post.mediaUrls[0]) === 'video'"
+                 [src]="post.mediaUrls[0]"
+                 controls
+                 class="post-video"
+                 preload="metadata"
+                 (error)="onVideoError($event)"></video>
+          <img *ngIf="getMediaType(post.mediaUrls[1]) === 'image'"
+               [src]="post.mediaUrls[1]"
+               alt="Post image 2"
+               class="post-image"
+               loading="lazy"
+               (error)="onImageError($event)">
+          <video *ngIf="getMediaType(post.mediaUrls[1]) === 'video'"
+                 [src]="post.mediaUrls[1]"
+                 controls
+                 class="post-video"
+                 preload="metadata"
+                 (error)="onVideoError($event)"></video>
+        </div>
+
+        <!-- Three or Four Media Items -->
+        <div class="media-container multi-images" *ngIf="post.mediaUrls.length >= 3">
+          <img *ngIf="getMediaType(post.mediaUrls[0]) === 'image'"
+               [src]="post.mediaUrls[0]"
+               alt="Post image 1"
+               class="post-image large"
+               loading="lazy"
+               (error)="onImageError($event)">
+          <video *ngIf="getMediaType(post.mediaUrls[0]) === 'video'"
+                 [src]="post.mediaUrls[0]"
+                 controls
+                 class="post-video large"
+                 preload="metadata"
+                 (error)="onVideoError($event)"></video>
+          <div class="image-grid">
+            <img *ngIf="getMediaType(post.mediaUrls[1]) === 'image'"
+                 [src]="post.mediaUrls[1]"
+                 alt="Post image 2"
+                 class="post-image"
+                 loading="lazy"
+                 (error)="onImageError($event)">
+            <video *ngIf="getMediaType(post.mediaUrls[1]) === 'video'"
+                   [src]="post.mediaUrls[1]"
+                   controls
+                   class="post-video"
+                   preload="metadata"
+                   (error)="onVideoError($event)"></video>
+            <img *ngIf="getMediaType(post.mediaUrls[2]) === 'image'"
+                 [src]="post.mediaUrls[2]"
+                 alt="Post image 3"
+                 class="post-image"
+                 loading="lazy"
+                 (error)="onImageError($event)">
+            <video *ngIf="getMediaType(post.mediaUrls[2]) === 'video'"
+                   [src]="post.mediaUrls[2]"
+                   controls
+                   class="post-video"
+                   preload="metadata"
+                   (error)="onVideoError($event)"></video>
+            <ng-container *ngIf="post.mediaUrls.length === 4">
+              <img *ngIf="getMediaType(post.mediaUrls[3]) === 'image'"
+                   [src]="post.mediaUrls[3]"
+                   alt="Post image 4"
+                   class="post-image"
+                   loading="lazy"
+                   (error)="onImageError($event)">
+              <video *ngIf="getMediaType(post.mediaUrls[3]) === 'video'"
+                     [src]="post.mediaUrls[3]"
+                     controls
+                     class="post-video"
+                     preload="metadata"
+                     (error)="onVideoError($event)"></video>
+            </ng-container>
+            <div class="image-placeholder" *ngIf="post.mediaUrls.length === 3"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="post-stats">
+        <span class="stat" *ngIf="post.likesCount > 0">
+          <strong>{{ post.likesCount }}</strong> {{ post.likesCount === 1 ? 'like' : 'likes' }}
+        </span>
+        <span class="stat" *ngIf="post.commentsCount > 0">
+          <strong>{{ post.commentsCount }}</strong> {{ post.commentsCount === 1 ? 'comment' : 'comments' }}
+        </span>
+      </div>
+    </mat-card-content>
+
+    <!-- Actions -->
+    <mat-card-actions>
+      <button mat-button class="action-btn like-btn" (click)="onLike()" [class.liked]="post.isLiked">
+        <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+        <span>{{ post.isLiked ? 'Unlike' : 'Like' }}</span>
+      </button>
+      <button mat-button class="action-btn comment-btn" (click)="onComment()">
+        <mat-icon>chat_bubble_outline</mat-icon>
+        <span>Comment</span>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+
+<div class="loading-container" *ngIf="isLoading">
+  <mat-spinner></mat-spinner>
+</div>

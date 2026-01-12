@@ -113,7 +113,31 @@ export class PostCardComponent {
   }
 
   getMediaType(url: string): 'image' | 'video' {
+    if (!url) return 'image';
     const ext = url.split('.').pop()?.toLowerCase();
     return (ext === 'mp4' || ext === 'webm' || ext === 'ogg' || ext === 'mov') ? 'video' : 'image';
+  }
+
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3QgZmlsbD0iI2VlZSIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiLz48dGV4dCBmaWxsPSIjOTk5IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjEwMCIgeT0iMTAwIj5JbWFnZSBub3QgYXZhaWxhYmxlPC90ZXh0Pjwvc3ZnPg==';
+    img.alt = 'Image not available';
+  }
+
+  onVideoError(event: Event): void {
+    const video = event.target as HTMLVideoElement;
+    video.style.display = 'none';
+    // Show a placeholder instead
+    const parent = video.parentElement;
+    if (parent && !parent.querySelector('.video-error')) {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'video-error';
+      placeholder.innerHTML = '<span>Video not available</span>';
+      parent.appendChild(placeholder);
+    }
+  }
+
+  isValidUrl(url: string): boolean {
+    return !!url && url.trim().length > 0 && (url.startsWith('http') || url.startsWith('/'));
   }
 }

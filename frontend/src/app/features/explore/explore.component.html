@@ -29,15 +29,15 @@
         <button
           *ngIf="!isOwnProfile(user.id)"
           mat-raised-button
-          [color]="user.isSubscribed ? 'accent' : 'primary'"
+          [color]="user.subscribed ? 'accent' : 'primary'"
           (click)="subscribe(user.id, $event)"
           [disabled]="isSubscribing(user.id)"
         >
           <mat-icon *ngIf="!isSubscribing(user.id)">
-            {{ user.isSubscribed ? 'person_remove' : 'person_add' }}
+            {{ user.subscribed ? 'person_remove' : 'person_add' }}
           </mat-icon>
           <mat-spinner *ngIf="isSubscribing(user.id)" diameter="20"></mat-spinner>
-          {{ user.isSubscribed ? 'Unsubscribe' : 'Subscribe' }}
+          {{ user.subscribed ? 'Unsubscribe' : 'Subscribe' }}
         </button>
         <button mat-button (click)="navigateToProfile(user.id); $event.stopPropagation()">
           View Profile

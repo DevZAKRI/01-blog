@@ -14,21 +14,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users")
+@Table(name = "subscriptions")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Subscription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String username;
-    private String password;
-    private String email;
-    private String role = "USER";
-    private String bio;
-    private String avatarUrl;
-    private boolean banned = false;
+
+    @Column(nullable = false)
+    private Long userId; // The user being subscribed to
+
+    @Column(nullable = false)
+    private Long subscriberId; // The user who is subscribing
 
     @Column(updatable = false)
     private Instant createdAt;

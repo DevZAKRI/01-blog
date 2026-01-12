@@ -4,28 +4,36 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.zerooneblog.blog.dto.request.UpdateUserRequest;
 import com.zerooneblog.blog.exception.NotFoundException;
 import com.zerooneblog.blog.model.Post;
+import com.zerooneblog.blog.model.Subscription;
 import com.zerooneblog.blog.model.User;
 import com.zerooneblog.blog.repository.PostRepository;
+import com.zerooneblog.blog.repository.SubscriptionRepository;
 import com.zerooneblog.blog.repository.UserRepository;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final SubscriptionRepository subscriptionRepository;
     private final NotificationService notificationService;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PostRepository postRepository, NotificationService notificationService, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PostRepository postRepository, 
+                      SubscriptionRepository subscriptionRepository, NotificationService notificationService, 
+                      PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.postRepository = postRepository;
+        this.subscriptionRepository = subscriptionRepository;
         this.notificationService = notificationService;
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional(readOnly = true)
     public User findById(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
     }
@@ -35,24 +43,51 @@ public class UserService {
         return postRepository.findByAuthorAndHiddenFalse(u, pageable);
     }
 
-    public void subscribe(User target, User subscriber) {
-        if (target.getId().equals(subscriber.getId())) throw new IllegalArgumentException("Cannot subscribe to yourself");
-        if (target.getSubscribers().add(subscriber)) {
-            userRepository.save(target);
-            // trigger notification to the target user about new subscriber
-            try {
-                notificationService.createNotification(target, "new_subscriber", "@" + subscriber.getUsername() + " started following you.");
-            } catch (Exception e) {
-                // do not block subscribe on notification failure
-                org.slf4j.LoggerFactory.getLogger(UserService.class).warn("Failed to send notification: {}", e.getMessage());
-            }
+    @Transactional
+    public void subscribe(Long userId, Long subscriberId) {
+        if (userId.equals(subscriberId)) {
+            throw new IllegalArgumentException("Cannot subscribe to yourself");
+        }
+        
+        // Check if already subscribed
+        if (subscriptionRepository.existsByUserIdAndSubscriberId(userId, subscriberId)) {
+            return; // Already subscribed
+        }
+        
+        // Verify both users exist
+        User targetUser = findById(userId);
+        User subscriber = findById(subscriberId);
+        
+        // Create subscription
+        Subscription subscription = new Subscription();
+        subscription.setUserId(userId);
+        subscription.setSubscriberId(subscriberId);
+        subscriptionRepository.save(subscription);
+        
+        // Send notification
+        try {
+            notificationService.createNotification(targetUser, "new_subscriber", 
+                "@" + subscriber.getUsername() + " started following you.");
+        } catch (Exception e) {
+            // Don't block subscribe on notification failure
         }
     }
 
-    public void unsubscribe(User target, User subscriber) {
-        if (target.getSubscribers().remove(subscriber)) {
-            userRepository.save(target);
-        }
+    @Transactional
+    public void unsubscribe(Long userId, Long subscriberId) {
+        subscriptionRepository.deleteByUserIdAndSubscriberId(userId, subscriberId);
+    }
+    
+    public long getSubscriberCount(Long userId) {
+        return subscriptionRepository.countByUserId(userId);
+    }
+    
+    public long getSubscriptionsCount(Long userId) {
+        return subscriptionRepository.countBySubscriberId(userId);
+    }
+    
+    public boolean isSubscribed(Long userId, Long subscriberId) {
+        return subscriptionRepository.existsByUserIdAndSubscriberId(userId, subscriberId);
     }
 
     public User findByUsername(String username) {
@@ -63,17 +98,14 @@ public class UserService {
         return userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
     }
 
-    public Page<User> listAll(Pageable pageable) { return userRepository.findAll(pageable); }
+    @Transactional(readOnly = true)
+    public Page<User> listAll(Pageable pageable) { 
+        return userRepository.findAll(pageable); 
+    }
 
     public Page<Post> listPostsByAuthor(Long authorId, Pageable pageable) {
         User author = userRepository.findById(authorId).orElseThrow(() -> new NotFoundException("Author not found"));
         return postRepository.findByAuthorAndHiddenFalse(author, pageable);
-    }
-
-    public Page<Post> listPostsForSubscription(User owner, Long authorId, Pageable pageable) {
-        User author = userRepository.findById(authorId).orElseThrow(() -> new NotFoundException("Author not found"));
-        if (!owner.getSubscriptions().contains(author)) throw new IllegalArgumentException("Not subscribed to this author");
-        return postRepository.findByAuthor(author, pageable);
     }
 
     public User updateProfile(User user, UpdateUserRequest req) {

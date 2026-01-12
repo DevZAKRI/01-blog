@@ -1,6 +1,7 @@
 package com.zerooneblog.blog.controller;
 
 import java.net.URI;
+import java.util.logging.Logger;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +28,7 @@ import com.zerooneblog.blog.service.PostService;
 @RestController
 @RequestMapping("/api/v1/posts")
 public class PostController {
+    private static final Logger logger = Logger.getLogger(PostController.class.getName());
     private final PostService postService;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
@@ -48,17 +50,17 @@ public class PostController {
     @PostMapping
     public ResponseEntity<PostDto> create(@jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.zerooneblog.blog.dto.request.CreatePostRequest req, Authentication auth) {
         try {
-            System.out.println("[POST CREATE] Step 1: Starting post creation");
-            System.out.println("[POST CREATE] Auth name: " + (auth != null ? auth.getName() : "null"));
-            System.out.println("[POST CREATE] Title: " + req.getTitle());
-            System.out.println("[POST CREATE] Description length: " + (req.getDescription() != null ? req.getDescription().length() : "null"));
-            System.out.println("[POST CREATE] Media URLs count: " + (req.getMediaUrls() != null ? req.getMediaUrls().length : 0));
+            logger.info("[PostController] POST /posts - Step 1: Starting post creation");
+            logger.info("[PostController] Auth name: " + (auth != null ? auth.getName() : "null"));
+            logger.info("[PostController] Title: " + req.getTitle());
+            logger.fine("[PostController] Description length: " + (req.getDescription() != null ? req.getDescription().length() : "null"));
+            logger.fine("[PostController] Media URLs count: " + (req.getMediaUrls() != null ? req.getMediaUrls().length : 0));
             
-            System.out.println("[POST CREATE] Step 2: Getting current user");
+            logger.info("[PostController] Step 2: Getting current user");
             User u = currentUser(auth);
-            System.out.println("[POST CREATE] Current user ID: " + u.getId() + ", username: " + u.getUsername());
+            logger.info("[PostController] Current user ID: " + u.getId() + ", username: " + u.getUsername());
             
-            System.out.println("[POST CREATE] Step 3: Creating post object");
+            logger.fine("[PostController] Step 3: Creating post object");
             Post p = new Post();
             p.setAuthor(u);
             p.setTitle(req.getTitle());
@@ -66,30 +68,30 @@ public class PostController {
             
             // Convert mediaUrls array to JSON string
             if (req.getMediaUrls() != null && req.getMediaUrls().length > 0) {
-                System.out.println("[POST CREATE] Step 4: Serializing media URLs");
+                logger.fine("[PostController] Step 4: Serializing media URLs");
                 try {
                     String mediaJson = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(req.getMediaUrls());
                     p.setMediaUrls(mediaJson);
-                    System.out.println("[POST CREATE] Media URLs serialized: " + mediaJson);
+                    logger.fine("[PostController] Media URLs serialized: " + mediaJson);
                 } catch (Exception e) {
-                    System.err.println("[POST CREATE] ERROR: Failed to serialize media URLs: " + e.getMessage());
+                    logger.severe("[PostController] ERROR: Failed to serialize media URLs: " + e.getMessage());
                     p.setMediaUrls(null);
                 }
             } else {
-                System.out.println("[POST CREATE] Step 4: No media URLs to serialize");
+                logger.fine("[PostController] Step 4: No media URLs to serialize");
             }
             
-            System.out.println("[POST CREATE] Step 5: Calling postService.create()");
+            logger.info("[PostController] Step 5: Calling postService.create()");
             Post saved = postService.create(p);
-            System.out.println("[POST CREATE] Step 6: Post saved with ID: " + saved.getId());
+            logger.info("[PostController] Step 6: Post saved with ID: " + saved.getId());
             
-            System.out.println("[POST CREATE] Step 7: Converting to DTO");
+            logger.fine("[PostController] Step 7: Converting to DTO");
             PostDto dto = EntityMapper.toDto(saved, u);
-            System.out.println("[POST CREATE] Step 8: Post creation successful");
+            logger.info("[PostController] Step 8: Post creation successful");
             return ResponseEntity.created(URI.create("/api/v1/posts/" + saved.getId())).body(dto);
         } catch (Exception e) {
-            System.err.println("[POST CREATE] ERROR: Exception occurred: " + e.getClass().getName());
-            System.err.println("[POST CREATE] ERROR: Message: " + e.getMessage());
+            logger.severe("[PostController] ERROR: Exception occurred: " + e.getClass().getName());
+            logger.severe("[PostController] ERROR: Message: " + e.getMessage());
             e.printStackTrace();
             throw e;
         }

@@ -66,13 +66,18 @@ export class ProfileComponent implements OnInit {
   loadProfile(userId: string): void {
     this.isLoading = true;
     const currentUser = this.authService.getCurrentUser();
-    this.isOwner = currentUser?.id === userId;
+    this.isOwner = currentUser?.id?.toString() === userId;
 
     this.userService.getUser(userId).subscribe({
       next: (user) => {
         this.user = user;
+        // Check if backend returned subscribed status
+        if (user.subscribed !== undefined) {
+          this.isSubscribed = user.subscribed;
+        }
         this.loadPosts(userId);
-        if (!this.isOwner) {
+        if (!this.isOwner && user.subscribed === undefined) {
+          // Fallback: check subscription if not provided by backend
           this.checkSubscription(userId);
         }
       },
@@ -113,6 +118,10 @@ export class ProfileComponent implements OnInit {
     action.subscribe({
       next: () => {
         this.isSubscribed = !this.isSubscribed;
+        // Update subscriber count
+        if (this.user && this.user.subscribersCount !== undefined) {
+          this.user.subscribersCount += this.isSubscribed ? 1 : -1;
+        }
         this.snackBar.open(
           this.isSubscribed ? 'Subscribed successfully' : 'Unsubscribed successfully',
           'Close',

@@ -29,7 +29,7 @@ import { EditPostDialogComponent } from '../post/edit-post-dialog/edit-post-dial
 export class FeedComponent implements OnInit {
   posts: Post[] = [];
   isLoading = false;
-  page = 1;
+  page = 0;
   hasMore = true;
 
   constructor(
@@ -49,7 +49,8 @@ export class FeedComponent implements OnInit {
     this.postService.getFeedPosts(this.page, 10).subscribe({
       next: (response) => {
         this.posts = [...this.posts, ...response.posts];
-        this.hasMore = this.posts.length < response.total;
+        // Check if we got fewer items than requested, meaning we reached the end
+        this.hasMore = response.posts && response.posts.length === 10;
         this.page++;
         this.isLoading = false;
       },

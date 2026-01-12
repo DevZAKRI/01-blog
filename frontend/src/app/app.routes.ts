@@ -37,6 +37,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/explore/explore.component').then(m => m.ExploreComponent)
       },
       {
+        path: 'post/:id',
+        loadComponent: () => import('./features/post/post-detail/post-detail.component').then(m => m.PostDetailComponent)
+      },
+      {
         path: 'admin',
         canActivate: [adminGuard],
         loadComponent: () => import('./features/admin/admin.component').then(m => m.AdminComponent)
