@@ -29,16 +29,16 @@ A modern, full-stack social blogging platform designed for students. Built with 
 
 ### User Features
 - 🔐 **Authentication** - Register, login with email/username, JWT-based sessions
-- 📝 **Rich Text Posts** - Create posts with Quill editor, support for images (up to 4)
-- 💬 **Comments** - Nested comment system with likes
+- 📝 **Text Posts** - Create posts, support for images (up to 4)
+- 💬 **Comments** - Nested comment system
 - ❤️ **Likes** - Like posts and comments
 - 🔔 **Notifications** - Real-time notifications for follows, likes, comments
 - 👤 **Profiles** - User profiles with bio, avatar, post history
-- 🔍 **Explore** - Discover new content and users
+- 🔍 **Explore** - Discover new users
 - 🔔 **Subscriptions** - Follow users and get feed updates
 
 ### Admin Features
-- 🛡️ **User Management** - Ban/unban users
+- 🛡️ **User Management** - Ban/unban/DELETE users
 - 📊 **Content Moderation** - Hide/show posts
 - 🚨 **Report System** - Review and manage user reports
 
@@ -67,7 +67,6 @@ A modern, full-stack social blogging platform designed for students. Built with 
 | **Angular Material** | 20.x | UI component library |
 | **Angular CDK** | 20.x | Component development kit |
 | **RxJS** | 7.8 | Reactive programming |
-| **Quill / ngx-quill** | 2.0 / 26.0 | Rich text editor |
 | **TypeScript** | 5.8 | Programming language |
 
 ### DevOps & Infrastructure
